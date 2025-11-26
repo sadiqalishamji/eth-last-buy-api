@@ -1,6 +1,4 @@
 <?php
-header('Content-Type: application/json');
-
 $apiKey = $_ENV['BINANCE_API_KEY'];
 $apiSecret = $_ENV['BINANCE_API_SECRET'];
 $symbol = "ETHUSDT";

@@ -230,9 +230,7 @@ function buildTable(currentPrice) {
       <td>${ showPnl ? grossPnl.toFixed(2) : '' }</td>
       <td>${ showPnl ? fee.toFixed(2) : '' }</td>
       <td>${ showPnl ? netPnl.toFixed(2) : '' }</td>
-      <td>${ showPnl ? `<button onclick="closeLot(${price}, ${eth})">Close</button>` : '' }</td>
-
-    `;
+      `;
 
     if (showPnl && netPnl > 0) {
     const btnTd = document.createElement('td');

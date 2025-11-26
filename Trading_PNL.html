@@ -148,8 +148,9 @@
 
   <!-- API Fetch Confirmation Panel -->
   <div id="fetchedInfo">
-    Current ETH Price: <span id="currentPriceDisplay">-</span> USD &nbsp; | &nbsp;
+    ETH Price: <span id="currentPriceDisplay">-</span> USD &nbsp; | &nbsp;
     Nearest Buy order: <span id="lastBuyDisplay">-</span> USD
+    Available (isolated): <span id="usdtBalance">-</span> USD
   </div>
 
   <!-- Inputs -->
@@ -363,6 +364,22 @@ async function closeAndRebuy(price, eth, btn) {
   }
 }
 
+/* ====== Fetch Balance of available usdt in isolated wallet ====== */
+async function fetchBalance() {
+  try {
+    const resp = await fetch('getBalance.php');
+    const data = await resp.json();
+    const bal = data.freeUSDT ?? 0;
+    // update some DOM element
+    document.getElementById('usdtBalance').textContent = bal.toFixed(2) + ' USDT';
+    return bal;
+  } catch (e) {
+    console.error("Balance fetch error", e);
+    return 0;
+  }
+}
+
+
 /* ====== Refresh logic (safe with fallbacks) ====== */
 let _refreshRunning = false;
 async function safeRefresh() {
@@ -379,6 +396,9 @@ async function safeRefresh() {
       // ensure UI shows the fetched current price
       document.getElementById('currentPriceDisplay').textContent = parseFloat(currentPrice).toFixed(2);
     }
+
+    const usdtFree = await fetchBalance();  // updates UI element
+
     buildTable(currentPrice);
   } finally {
     _refreshRunning = false;

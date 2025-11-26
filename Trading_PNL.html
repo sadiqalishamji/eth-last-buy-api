@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ETH Buy Table</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #eef2f7;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .inputs div {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .inputs label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .inputs input {
+      padding: 8px 10px;
+      width: 140px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      transition: 0.2s;
+    }
+
+    .inputs input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #007bff;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .profit {
+      color: #0a9d58;
+      font-weight: bold;
+    }
+
+    .loss {
+      color: #d93025;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>ETH Buy Table</h1>
+
+  <!-- Display fetched info -->
+  <div id="fetchedInfo" style="text-align:center; margin-bottom:20px; font-weight:bold;">
+    Current ETH Price: <span id="currentPriceDisplay">-</span> USD | 
+    Last Buy Price: <span id="lastBuyDisplay">-</span> USD
+  </div>
+
+  <div class="inputs">
+    <div>
+      <label>Start Price</label>
+      <input id="startPrice" type="number">
+    </div>
+    <div>
+      <label>End Price</label>
+      <input id="endPrice" type="number">
+    </div>
+    <div>
+      <label>Price Step ($)</label>
+      <input id="step" type="number">
+    </div>
+    <div>
+      <label>Lot Size (ETH)</label>
+      <input id="lotSize" type="number" step="0.0001">
+    </div>
+    <div>
+      <label>Last Buy Price</label>
+      <input id="lastBuy" type="number">
+    </div>
+  </div>
+
+  <table id="buyTable">
+    <thead>
+      <tr>
+        <th>Buy Price (USD)</th>
+        <th>ETH Bought</th>
+        <th>Cost (USD)</th>
+        <th>Current Value (USD)</th>
+        <th>Gross P/L</th>
+        <th>Fee 0.2%</th>
+        <th>Net P/L</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const defaultValues = {
+  startPrice: 5000,
+  endPrice: 2520,
+  step: 20,
+  lotSize: 0.12,
+  lastBuy: 2940
+};
+
+// Load saved or default values
+function loadInputs() {
+  for (const key in defaultValues) {
+    const input = document.getElementById(key);
+    const saved = localStorage.getItem(key);
+    input.value = saved !== null ? saved : defaultValues[key];
+
+    // save on change and refresh table
+    input.addEventListener('input', () => {
+      localStorage.setItem(key, input.value);
+      refresh();
+    });
+  }
+}
+
+// Fetch current price from Binance
+async function fetchCurrentPrice() {
+  const resp = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
+  const data = await resp.json();
+  const price = parseFloat(data.price);
+  document.getElementById('currentPriceDisplay').textContent = price.toFixed(2);
+  return price;
+}
+
+// Fetch last buy price from server API
+async function fetchLastBuy() {
+  try {
+    const resp = await fetch('https://eth-last-buy-api-2.onrender.com/getLastBuy.php');
+    const data = await resp.json();
+    const lastBuyInput = document.getElementById('lastBuy');
+    if (data.lastBuyPrice && data.lastBuyPrice > 0) {
+      lastBuyInput.value = parseFloat(data.lastBuyPrice).toFixed(2);
+      localStorage.setItem('lastBuy', lastBuyInput.value);
+    }
+    document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value;
+  } catch (e) {
+    console.error('Failed to fetch last buy price', e);
+    document.getElementById('lastBuyDisplay').textContent = '-';
+  }
+}
+
+// Build table
+function buildTable(currentPrice) {
+  const start = parseFloat(document.getElementById('startPrice').value);
+  const end   = parseFloat(document.getElementById('endPrice').value);
+  const step  = parseFloat(document.getElementById('step').value);
+  const lot   = parseFloat(document.getElementById('lotSize').value);
+  const lastBuy = parseFloat(document.getElementById('lastBuy').value);
+
+  const tbody = document.getElementById('buyTable').querySelector('tbody');
+  tbody.innerHTML = '';
+
+  const feeRate = 0.002; // 0.20%
+  const buys = [];
+  for(let price = start; price >= end; price -= step) {
+    buys.push(price);
+  }
+  buys.reverse(); // invert
+
+  buys.forEach(price => {
+    const eth = lot;
+    const cost = eth * price;
+    const currentVal = eth * currentPrice;
+    const grossPnl = currentVal - cost;
+    const fee = cost * feeRate;
+    const netPnl = grossPnl - fee;
+    let showPnl = price >= lastBuy;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${price.toFixed(2)}</td>
+      <td>${eth.toFixed(4)}</td>
+      <td>${cost.toFixed(2)}</td>
+      <td>${currentVal.toFixed(2)}</td>
+      <td>${ showPnl ? grossPnl.toFixed(2) : '' }</td>
+      <td>${ showPnl ? fee.toFixed(2) : '' }</td>
+      <td>${ showPnl ? netPnl.toFixed(2) : '' }</td>
+    `;
+
+    if (showPnl) {
+      tr.querySelector('td:nth-child(5)').className = grossPnl >= 0 ? 'profit' : 'loss';
+      tr.querySelector('td:last-child').className = netPnl >= 0 ? 'profit' : 'loss';
+    }
+
+    tbody.appendChild(tr);
+  });
+}
+
+// Refresh table
+async function refresh() {
+  const currentPrice = await fetchCurrentPrice();
+  await fetchLastBuy();
+  buildTable(currentPrice);
+}
+
+// initialize
+loadInputs();
+refresh();
+setInterval(refresh, 5000);
+</script>
+
+
+</body>
+</html>

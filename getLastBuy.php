@@ -1,12 +1,10 @@
 <?php
-// getLastBuy.php
-
-$apiKey = $_SERVER['BINANCE_API_KEY'] ?? 'DUMMY_KEY';
-$apiSecret = $_SERVER['BINANCE_API_SECRET'] ?? 'DUMMY_SECRET';
+$apiKey = $_ENV['BINANCE_API_KEY'] ?? 'DUMMY_KEY';
+$apiSecret = $_ENV['BINANCE_API_SECRET'] ?? 'DUMMY_SECRET';
 
 $symbol = "ETHUSDT";
 $isIsolated = "true";
-$limit = 10; // fetch last 10 trades
+$limit = 10; 
 $timestamp = round(microtime(true) * 1000);
 
 $query = "symbol=$symbol&isIsolated=$isIsolated&limit=$limit&timestamp=$timestamp";
@@ -23,13 +21,12 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 $data = json_decode($response, true);
-echo $response;
+
 $lastBuyPrice = 0;
 if (!empty($data)) {
     foreach (array_reverse($data) as $trade) {
         if (isset($trade['isBuyer']) && $trade['isBuyer'] == true) {
             $lastBuyPrice = $trade['price'];
-            echo $lastBuyPrice;
             break;
         }
     }

@@ -193,6 +193,22 @@ async function fetchLastBuy() {
   }
 }
 
+async function fetchNearestBuy() {
+    try {
+        const resp = await fetch('getNearestBuy.php');
+        const data = await resp.json();
+        const lastBuyInput = document.getElementById('lastBuy');
+        if (data.nearestBuyPrice && data.nearestBuyPrice > 0) {
+            lastBuyInput.value = parseFloat(data.nearestBuyPrice).toFixed(2);
+            localStorage.setItem('lastBuy', lastBuyInput.value);
+        }
+        document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value;
+    } catch (e) {
+        console.error('Failed to fetch nearest buy', e);
+        document.getElementById('lastBuyDisplay').textContent = '-';
+    }
+}
+
 
 // Build table
 function buildTable(currentPrice) {
@@ -219,7 +235,7 @@ function buildTable(currentPrice) {
     const grossPnl = currentVal - cost;
     const fee = cost * feeRate;
     const netPnl = grossPnl - fee;
-    let showPnl = price >= lastBuy;
+    let showPnl = price > lastBuy;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -257,7 +273,7 @@ function buildTable(currentPrice) {
 // Refresh table
 async function refresh() {
   const currentPrice = await fetchCurrentPrice();
-  await fetchLastBuy();
+  await fetchNearestBuy();
   buildTable(currentPrice);
 }
 

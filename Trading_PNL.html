@@ -78,16 +78,21 @@
 
     /* Table Styles */
     table {
-      width: 100%;
+      width: auto;   
       border-collapse: collapse;
       font-size: 14px;
-      margin-top: 10px;
+      margin: 0 auto; 
     }
 
     th, td {
-      border: 1px solid #e6e9ee;
-      padding: 4px 6px;
-      vertical-align: middle;
+     border: 1px solid #ddd;
+     padding: 6px 4px;   /* Vertical 6px, Horizontal 4px (tight) */
+     text-align: center;
+     white-space: nowrap; /* Prevent text stretching column width */
+     min-width: 70px;     /* restrict column width */
+     max-width: 110px;    /* prevent extra wide columns */
+     overflow: hidden;
+     text-overflow: ellipsis;
     }
 
     th {

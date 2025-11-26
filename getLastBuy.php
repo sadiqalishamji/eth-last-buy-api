@@ -34,5 +34,4 @@ if (!empty($data)) {
 
 //header('Content-Type: application/json');
 echo json_encode(['lastBuyPrice' => $lastBuyPrice]);
-echo $apiKey;
 ?>

@@ -178,7 +178,7 @@ async function fetchCurrentPrice() {
 // Fetch last buy price from server API
 async function fetchLastBuy() {
   try {
-    const resp = await fetch('https://eth-last-buy-api-2.onrender.com/getLastBuy.php');
+    const resp = await fetch('/getLastBuy.php');
     const data = await resp.json();
     const lastBuyInput = document.getElementById('lastBuy');
     if (data.lastBuyPrice && data.lastBuyPrice > 0) {

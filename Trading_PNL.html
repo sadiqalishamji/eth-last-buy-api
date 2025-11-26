@@ -136,6 +136,7 @@
         <th>Gross P/L</th>
         <th>Fee 0.2%</th>
         <th>Net P/L</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -229,12 +230,27 @@ function buildTable(currentPrice) {
       <td>${ showPnl ? grossPnl.toFixed(2) : '' }</td>
       <td>${ showPnl ? fee.toFixed(2) : '' }</td>
       <td>${ showPnl ? netPnl.toFixed(2) : '' }</td>
+      <td>${ showPnl ? `<button onclick="closeLot(${price}, ${eth})">Close</button>` : '' }</td>
+
     `;
 
-    if (showPnl) {
-      tr.querySelector('td:nth-child(5)').className = grossPnl >= 0 ? 'profit' : 'loss';
-      tr.querySelector('td:last-child').className = netPnl >= 0 ? 'profit' : 'loss';
-    }
+    if (showPnl && netPnl > 0) {
+    const btnTd = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.textContent = 'Close';
+    btn.style.padding = '4px 8px';
+    btn.style.cursor = 'pointer';
+    btn.style.borderRadius = '4px';
+    btn.style.border = 'none';
+    btn.style.backgroundColor = '#007bff';
+    btn.style.color = '#fff';
+    btn.addEventListener('click', () => closeAndRebuy(price, eth));
+    btnTd.appendChild(btn);
+    tr.appendChild(btnTd);
+} else {
+    const emptyTd = document.createElement('td');
+    tr.appendChild(emptyTd);
+}
 
     tbody.appendChild(tr);
   });

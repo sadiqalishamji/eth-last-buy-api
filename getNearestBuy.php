@@ -40,5 +40,5 @@ if (!empty($data)) {
         }
     }
 }
-
+echo $response;
 echo json_encode(['nearestBuyPrice' => $nearestBuy]);

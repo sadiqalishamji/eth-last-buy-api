@@ -263,6 +263,26 @@ async function refresh() {
   buildTable(currentPrice);
 }
 
+async function closeAndRebuy(price, eth) {
+  if (!confirm(`Close ${eth} ETH at market and place buy limit at ${price}?`)) return;
+
+  const formData = new FormData();
+  formData.append('price', price);
+  formData.append('lot', eth);
+
+  const resp = await fetch('tradeAction.php', {
+      method: 'POST',
+      body: formData
+  });
+  const data = await resp.json();
+  if (data.status === 'success') {
+      alert('Market sell and limit buy placed successfully!');
+  } else {
+      alert('Error: ' + (data.msg || 'Unknown error'));
+  }
+}
+
+  
 // initialize
 loadInputs();
 refresh();

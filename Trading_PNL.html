@@ -281,7 +281,7 @@ function buildTable(currentPrice) {
     const gross = currentValue - cost;
     const fee   = cost * feeRate;
     const net   = gross - fee;
-    const showPnl = buyPrice >= lastBuy; // PNL only shown for buys >= selected threshold
+    const showPnl = buyPrice > lastBuy; // PNL only shown for buys >= selected threshold
 
     const tr = document.createElement('tr');
 

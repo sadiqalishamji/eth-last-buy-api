@@ -2,8 +2,6 @@
 $apiKey = $_ENV['BINANCE_API_KEY'] ?? 'DUMMY_KEY';
 $apiSecret = $_ENV['BINANCE_API_SECRET'] ?? 'DUMMY_SECRET';
 
-echo $apiKey;
-
 $symbol = "ETHUSDT";
 $isIsolated = "true";
 $limit = 10; 
@@ -34,6 +32,7 @@ if (!empty($data)) {
     }
 }
 
-header('Content-Type: application/json');
+//header('Content-Type: application/json');
 echo json_encode(['lastBuyPrice' => $lastBuyPrice]);
+echo $apiKey;
 ?>

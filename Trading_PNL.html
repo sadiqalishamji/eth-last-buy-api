@@ -4,61 +4,77 @@
   <meta charset="utf-8">
   <title>ETH Buy Table</title>
   <style>
+    /* Base Layout */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 30px 20px;
       background: #eef2f7;
+      color: #222;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1050px;
       margin: 0 auto;
       background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      padding: 28px 26px;
+      border-radius: 14px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 25px;
-      color: #333;
+      margin-bottom: 26px;
+      font-size: 24px;
+      font-weight: 700;
     }
 
+    /* API Info Display */
+    #fetchedInfo {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    #currentPriceDisplay,
+    #lastBuyDisplay {
+      padding: 3px 6px;
+    }
+
+    /* Inputs Panel */
     .inputs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: center;
-      margin-bottom: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 22px;
+      margin-bottom: 32px;
+      padding: 12px;
     }
 
     .inputs div {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
     }
 
     .inputs label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #555;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 14px;
     }
 
     .inputs input {
-      padding: 8px 10px;
-      width: 140px;
-      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 14px;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      transition: 0.2s;
     }
 
     .inputs input:focus {
       border-color: #007bff;
-      outline: none;
+      outline: 3px solid rgba(0,123,255,0.15);
     }
 
+    /* Table Styles */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -66,30 +82,59 @@
     }
 
     th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
+      border: 1px solid #e0e4ea;
+      padding: 12px 8px;
     }
 
     th {
       background: #007bff;
       color: #fff;
       font-weight: 600;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.3px;
     }
 
     tr:nth-child(even) {
-      background: #f9f9f9;
+      background: #f8fafc;
     }
 
+    tr:hover {
+      background: rgba(0,123,255,0.04);
+    }
+
+    /* Profit/Loss Coloring */
     .profit {
-      color: #0a9d58;
-      font-weight: bold;
+      color: #0a9d58; /* Green */
+      font-weight: 700;
     }
 
     .loss {
-      color: #d93025;
-      font-weight: bold;
+      color: #d93025; /* Red */
+      font-weight: 700;
     }
+
+    /* Close Button */
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.85;
+      transform: scale(1.03);
+    }
+
+    .btn-close {
+      background: #007bff;
+      color: #fff;
+    }
+
   </style>
 </head>
 <body>
@@ -97,12 +142,13 @@
 <div class="container">
   <h1>ETH Buy Table</h1>
 
-  <!-- Display fetched info -->
-  <div id="fetchedInfo" style="text-align:center; margin-bottom:20px; font-weight:bold;">
+  <!-- API Fetch Confirmation Panel -->
+  <div id="fetchedInfo">
     Current ETH Price: <span id="currentPriceDisplay">-</span> USD | 
-    Nearest Buy order: <span id="lastBuyDisplay">-</span> USD
+    Nearest Buy Order: <span id="lastBuyDisplay">-</span> USD
   </div>
 
+  <!-- Inputs -->
   <div class="inputs">
     <div>
       <label>Start Price</label>
@@ -113,7 +159,7 @@
       <input id="endPrice" type="number">
     </div>
     <div>
-      <label>Price Step ($)</label>
+      <label>Price Step (USD)</label>
       <input id="step" type="number">
     </div>
     <div>
@@ -121,18 +167,19 @@
       <input id="lotSize" type="number" step="0.0001">
     </div>
     <div>
-      <label>Nearest Buy order</label>
+      <label>Nearest Buy Order</label>
       <input id="lastBuy" type="number">
     </div>
   </div>
 
+  <!-- Table -->
   <table id="buyTable">
     <thead>
       <tr>
-        <th>Buy Price (USD)</th>
+        <th>Buy Price</th>
         <th>ETH Bought</th>
-        <th>Cost (USD)</th>
-        <th>Current Value (USD)</th>
+        <th>Cost</th>
+        <th>Current Value</th>
         <th>Gross P/L</th>
         <th>Fee 0.2%</th>
         <th>Net P/L</th>
@@ -144,78 +191,7 @@
 </div>
 
 <script>
-const defaultValues = {
-  startPrice: 5000,
-  endPrice: 2520,
-  step: 20,
-  lotSize: 0.12,
-  lastBuy: 2940
-};
-
-// Load saved or default values
-function loadInputs() {
-  for (const key in defaultValues) {
-    const input = document.getElementById(key);
-    const saved = localStorage.getItem(key);
-    input.value = saved !== null ? saved : defaultValues[key];
-
-    // save on change and refresh table
-    input.addEventListener('input', () => {
-      localStorage.setItem(key, input.value);
-      refresh();
-    });
-  }
-}
-
-// Fetch current price from Binance
-async function fetchCurrentPrice() {
-  const resp = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
-  const data = await resp.json();
-  const price = parseFloat(data.price);
-  document.getElementById('currentPriceDisplay').textContent = price.toFixed(2);
-  return price;
-}
-
-// Fetch last buy price from server API
-async function fetchLastBuy() {
-  try {
-    const resp = await fetch('getLastBuy.php'); // relative path
-    const data = await resp.json();
-    const lastBuyInput = document.getElementById('lastBuy');
-    if (data.lastBuyPrice && data.lastBuyPrice > 0) {
-      lastBuyInput.value = parseFloat(data.lastBuyPrice).toFixed(2);
-      localStorage.setItem('lastBuy', lastBuyInput.value);
-    }
-    document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value;
-  } catch (e) {
-    console.error('Failed to fetch last buy price', e);
-    document.getElementById('lastBuyDisplay').textContent = '-';
-  }
-}
-
-async function fetchNearestBuy() {
-    try {
-        const resp = await fetch('getNearestBuy.php');
-        const data = await resp.json();
-        const lastBuyInput = document.getElementById('lastBuy');
-
-        if (data.nearestBuyPrice && data.nearestBuyPrice > 0) {
-            lastBuyInput.value = parseFloat(data.nearestBuyPrice).toFixed(2);
-            localStorage.setItem('lastBuy', lastBuyInput.value);
-        }
-
-        document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value;
-        document.getElementById('currentPriceDisplay').textContent = parseFloat(data.currentPrice).toFixed(2);
-
-    } catch (e) {
-        console.error('Failed to fetch nearest buy', e);
-        document.getElementById('lastBuyDisplay').textContent = '-';
-    }
-}
-
-
-
-// Build table
+// Enhance Table Row Logic with Profit/Loss Colors + Close Button Style
 function buildTable(currentPrice) {
   const start = parseFloat(document.getElementById('startPrice').value);
   const end   = parseFloat(document.getElementById('endPrice').value);
@@ -223,91 +199,55 @@ function buildTable(currentPrice) {
   const lot   = parseFloat(document.getElementById('lotSize').value);
   const lastBuy = parseFloat(document.getElementById('lastBuy').value);
 
-  const tbody = document.getElementById('buyTable').querySelector('tbody');
+  const tbody = document.querySelector('#buyTable tbody');
   tbody.innerHTML = '';
 
-  const feeRate = 0.002; // 0.20%
+  const feeRate = 0.002;
   const buys = [];
-  for(let price = start; price >= end; price -= step) {
-    buys.push(price);
+  for (let p = start; p >= end; p -= step) {
+    buys.push(p);
   }
-  buys.reverse(); // invert
+  buys.reverse();
 
-  buys.forEach(price => {
-    const eth = lot;
-    const cost = eth * price;
-    const currentVal = eth * currentPrice;
-    const grossPnl = currentVal - cost;
-    const fee = cost * feeRate;
-    const netPnl = grossPnl - fee;
-    let showPnl = price > lastBuy;
+  buys.forEach(buyPrice => {
+    const cost = lot * buyPrice;
+    const currentValue = lot * currentPrice;
+    const gross = currentValue - cost;
+    const fee   = cost * feeRate;
+    const net   = gross - fee;
+    const profitable = buyPrice > lastBuy;
 
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${price.toFixed(2)}</td>
-      <td>${eth.toFixed(4)}</td>
-      <td>${cost.toFixed(2)}</td>
-      <td>${currentVal.toFixed(2)}</td>
-      <td>${ showPnl ? grossPnl.toFixed(2) : '' }</td>
-      <td>${ showPnl ? fee.toFixed(2) : '' }</td>
-      <td>${ showPnl ? netPnl.toFixed(2) : '' }</td>
-      `;
 
-    if (showPnl && netPnl > 0) {
-    const btnTd = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.textContent = 'Close';
-    btn.style.padding = '4px 8px';
-    btn.style.cursor = 'pointer';
-    btn.style.borderRadius = '4px';
-    btn.style.border = 'none';
-    btn.style.backgroundColor = '#007bff';
-    btn.style.color = '#fff';
-    btn.addEventListener('click', () => closeAndRebuy(price, eth));
-    btnTd.appendChild(btn);
-    tr.appendChild(btnTd);
-} else {
-    const emptyTd = document.createElement('td');
-    tr.appendChild(emptyTd);
-}
+    // Columns 1-7
+    tr.innerHTML = `
+      <td>${buyPrice.toFixed(2)}</td>
+      <td>${lot.toFixed(4)}</td>
+      <td>${cost.toFixed(2)}</td>
+      <td>${currentValue.toFixed(2)}</td>
+      <td class="${profitable && gross >= 0 ? 'profit' : (profitable && gross < 0 ? 'loss' : '')}">
+        ${profitable ? gross.toFixed(2) : ''}
+      </td>
+      <td>${profitable ? fee.toFixed(2) : ''}</td>
+      <td class="${profitable && net >= 0 ? 'profit' : (profitable && net < 0 ? 'loss' : '')}">
+        ${profitable ? net.toFixed(2) : ''}
+      </td>
+    `;
+
+    // Close Button in Action Column
+    const tdAction = document.createElement('td');
+    if (profitable && net > 0) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Close';
+      btn.className = 'btn-close';
+      btn.addEventListener('click', () => closeAndRebuy(buyPrice, lot));
+      tdAction.appendChild(btn);
+    }
+    tr.appendChild(tdAction);
 
     tbody.appendChild(tr);
   });
 }
-
-// Refresh table
-async function refresh() {
-  const currentPrice = await fetchCurrentPrice();
-  await fetchNearestBuy();
-  buildTable(currentPrice);
-}
-
-async function closeAndRebuy(price, eth) {
-  if (!confirm(`Close ${eth} ETH at market and place buy limit at ${price}?`)) return;
-
-  const formData = new FormData();
-  formData.append('price', price);
-  formData.append('lot', eth);
-
-  const resp = await fetch('tradeAction.php', {
-      method: 'POST',
-      body: formData
-  });
-  const data = await resp.json();
-  if (data.status === 'success') {
-      alert('Market sell and limit buy placed successfully!');
-  } else {
-      alert('Error: ' + (data.msg || 'Unknown error'));
-  }
-}
-
-  
-// initialize
-loadInputs();
-refresh();
-setInterval(refresh, 5000);
 </script>
-
-
 </body>
 </html>

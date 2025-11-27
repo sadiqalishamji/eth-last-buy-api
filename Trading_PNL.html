@@ -135,7 +135,12 @@
       color: #fff;
       transition: 0.14s ease;
     }
-    .btn-close:hover { transform: translateY(-1px); opacity: 0.95; }
+    .btn-close:hover { 
+     transform: translateY(-1px); 
+     opacity: 0.95; 
+     }
+     #errorMsg { color:#d93025; }
+     #successMsg { color:#0a9d58; }
 
     /* Small screens */
     @media (max-width: 720px) {
@@ -150,6 +155,9 @@
 
 <div class="container">
   <h1>ETH Buy Table</h1>
+
+ <!--Current status of closing lots  -->
+<div id="statusMsg" style="text-align:center; margin:10px 0; font-weight:600; color:#007bff;"></div>
 
   <!-- API Fetch Confirmation Panel -->
   <div id="fetchedInfo">
@@ -322,7 +330,7 @@ function buildTable(currentPrice) {
       btn.className = 'btn-close';
       btn.textContent = 'Close';
       btn.title = `Sell ${lot} ETH (market) and place limit buy at ${buyPrice.toFixed(2)}`;
-      btn.addEventListener('click', () => closeAndRebuy(buyPrice, lot, btn));
+      btn.addEventListener('click', () => await closeAndRebuy(buyPrice, lot, btn));
       tdAction.appendChild(btn);
     } else {
       tdAction.textContent = '';
@@ -344,37 +352,47 @@ function buildTable(currentPrice) {
 
 /* ====== Close & Re-buy action (POST to server-side tradeAction.php) ====== */
 async function closeAndRebuy(price, eth, btn) {
-  if (!confirm(`Close ${eth} ETH at market and place buy limit at ${price.toFixed(2)}?`)) return;
+  // Immediate UI feedback
+  const msgBox = document.getElementById("statusMsg");
+  msgBox.textContent = `Submitting SELL market and BUY limit for ${eth} ETH at ${price.toFixed(2)} USD`;
+
+  // Disable button and show processing
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Processing...";
+
   try {
-    btn.disabled = true;
-    btn.textContent = 'Processing...';
-
     const form = new FormData();
-    form.append('price', price);
-    form.append('lot', eth);
+    form.append("price", price);
+    form.append("lot", eth);
 
-    const resp = await fetch('tradeAction.php', {
-      method: 'POST',
+    const resp = await fetch("tradeAction.php", {
+      method: "POST",
       body: form
     });
     const data = await resp.json();
 
-    if (data.status === 'success') {
-      alert('Market sell and limit buy placed successfully.');
-      // refresh to reflect changes
+    if (data.status === "success") {
+      // Non-blocking success message
+      msgBox.textContent = `Orders submitted successfully for ${eth} ETH at ${price.toFixed(2)} USD`;
+      msgBox.className = "successMsg";
       await safeRefresh();
     } else {
-      console.error('tradeAction error', data);
-      alert('Trade failed: ' + (data.msg || JSON.stringify(data)));
+      // Non-block error message
+      console.error("Trade error:", data.binanceResponse || data);
+      msgBox.textContent = `Trade submission failed for ${eth} ETH`;
     }
   } catch (err) {
-    console.error('closeAndRebuy exception', err);
-    alert('Request error: ' + err.message);
+    console.error("Fetch exception:", err);
+    msgBox.textContent = `Network error while submitting trade`;
+    msgBox.className = "errorMsg"; 
   } finally {
+    // Restore button UI
     btn.disabled = false;
-    btn.textContent = 'Close';
+    btn.textContent = originalText;
   }
 }
+
 
 /* ====== Fetch Balance of available usdt in isolated wallet ====== */
 async function fetchBalance() {

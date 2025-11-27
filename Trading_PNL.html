@@ -436,54 +436,65 @@ async function fetchBalance() {
 /* ====== Refresh logic (safe with fallbacks) ====== */
 let _refreshRunning = false;
 async function safeRefresh() {
-  if (_refreshRunning) return; // avoid overlapping refreshes
-  _refreshRunning = true;
+  refreshBusy = true;
   try {
-    // prefer server-provided nearest buy which includes current price
-    const nearest = await fetchNearestBuy(); // returns {nearestBuy, currentPrice}
+    const nearest = await fetchNearestBuy();
     let currentPrice = nearest.currentPrice;
     if (!currentPrice || currentPrice === 0) {
-      // fallback to public price
       currentPrice = await fetchCurrentPrice();
-    } else {
-      // ensure UI shows the fetched current price
-      document.getElementById('currentPriceDisplay').textContent = parseFloat(currentPrice).toFixed(2);
     }
-
-    const usdtFree = await fetchBalance();  // updates UI element
-
+    document.getElementById("currentPriceDisplay").textContent = parseFloat(currentPrice).toFixed(2);
+    await fetchBalance();
     buildTable(currentPrice);
+  } catch (err) {
+    console.error("Refresh failed:", err);
   } finally {
-    _refreshRunning = false;
+    refreshBusy = false;
   }
 }
+
 
 /* ====== Initialization ====== */
 loadInputs();
 safeRefresh();
 //setInterval(safeRefresh, 3000); // refresh every 5 seconds
 
-setInterval(async () => {
-  // countdown logic
+const refreshIntervalSec = 5;
+let refreshRemaining = refreshIntervalSec;
+let refreshBusy = false;
+
+// Dedicated countdown timer (runs every 100ms)
+setInterval(() => {
+  if (refreshBusy) return; // pause countdown during refresh
+
   refreshRemaining -= 0.1;
-  if (refreshRemaining <= 0) refreshRemaining = 0;
+  if (refreshRemaining < 0) refreshRemaining = 0;
 
   // update text
   const sec = Math.ceil(refreshRemaining);
   t1.textContent = sec;
   t2.textContent = sec;
 
-  // update ring progress
+  // update ring
   const progress = 1 - (refreshRemaining / refreshIntervalSec);
   const offset = circumference * (1 - progress);
   ring.setAttribute('stroke-dashoffset', offset.toFixed(2));
 
-  // trigger refresh exactly when timer reaches 0
-  if (refreshRemaining === 0) {
-    await safeRefresh();
-    refreshRemaining = refreshIntervalSec;
-  }
 }, 100);
+
+// Auto refresh interval (5 sec trigger, independent from countdown)
+setInterval(() => {
+  if (refreshBusy) return;
+  if (refreshRemaining > 0) return; // only refresh when countdown hits 0
+
+  refreshBusy = true;
+  safeRefresh().finally(() => {
+    refreshRemaining = refreshIntervalSec; // reset ONLY after refresh done
+    refreshBusy = false;
+  });
+
+}, 1000); // check every 1 sec if timer reached 0 then refresh
+
 
 
 </script>

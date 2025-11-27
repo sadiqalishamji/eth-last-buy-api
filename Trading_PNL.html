@@ -253,10 +253,8 @@ async function fetchNearestBuy() {
     }
     // update display fields
     document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value || '-';
-    if (data.currentPrice) {
-      document.getElementById('currentPriceDisplay').textContent = parseFloat(data.currentPrice).toFixed(2);
-    }
-    return { nearestBuy: parseFloat(lastBuyInput.value || 0), currentPrice: parseFloat(data.currentPrice || 0) };
+ 
+    return { nearestBuy: parseFloat(lastBuyInput.value || 0)};
   } catch (err) {
     console.error('fetchNearestBuy error', err);
     document.getElementById('lastBuyDisplay').textContent = document.getElementById('lastBuy').value || '-';

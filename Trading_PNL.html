@@ -153,9 +153,10 @@
 
   <!-- API Fetch Confirmation Panel -->
   <div id="fetchedInfo">
-    ETH Price: <span id="currentPriceDisplay">-</span> USD &nbsp; | &nbsp;
-    Nearest Buy order: <span id="lastBuyDisplay">-</span> USD
-    Available : <span id="usdtBalance">-</span>
+    ETH Price: <span id="currentPriceDisplay">-</span> &nbsp; | &nbsp;
+    Nearest Buy order: <span id="lastBuyDisplay">-</span> &nbsp; | &nbsp;
+    Available : <span id="usdtBalance">-</span>&nbsp; | &nbsp;
+    Available : <span id="jasonerror">-</span>
   </div>
 
   <!-- Inputs -->
@@ -246,6 +247,13 @@ async function fetchNearestBuy() {
     if (!resp.ok) throw new Error('Nearest-buy fetch failed');
     const data = await resp.json();
     const lastBuyInput = document.getElementById('lastBuy');
+	
+  if (data.status === "error") {
+      // Show the Binance error message
+      document.getElementById('jasonerror').textContent = data.msg;
+      console.error("Binance detail:", data.binanceResponse);
+      return; // stop further processing
+    }
 
     if (data.nearestBuyPrice && parseFloat(data.nearestBuyPrice) > 0) {
       lastBuyInput.value = parseFloat(data.nearestBuyPrice).toFixed(2);
@@ -253,11 +261,12 @@ async function fetchNearestBuy() {
     }
     // update display fields
     document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value || '-';
- 
     return { nearestBuy: parseFloat(lastBuyInput.value || 0)};
+
   } catch (err) {
     console.error('fetchNearestBuy error', err);
     document.getElementById('lastBuyDisplay').textContent = document.getElementById('lastBuy').value || '-';
+    document.getElementById('jasonerror').textContent = err;
     return { nearestBuy: parseFloat(document.getElementById('lastBuy').value || 0), currentPrice: null };
   }
 }

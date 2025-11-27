@@ -151,16 +151,6 @@
 
   </style>
 
-<script>
-const refreshIntervalSec = 5;
-let refreshRemaining = refreshIntervalSec;
-const ring = document.getElementById('refreshRing');
-const t1   = document.getElementById('refreshTimeText');
-const t2   = document.getElementById('refreshText');
-const circumference = 2 * Math.PI * 26; // r = 26
-ring.setAttribute('stroke-dasharray', circumference.toFixed(2));
-</script>
-
 </head>
 <body>
 
@@ -496,6 +486,17 @@ setInterval(async () => {
 
 
 </script>
+
+<script>
+const refreshIntervalSec = 5;
+let refreshRemaining = refreshIntervalSec;
+const ring = document.getElementById('refreshRing');
+const t1   = document.getElementById('refreshTimeText');
+const t2   = document.getElementById('refreshText');
+const circumference = 2 * Math.PI * 26; // r = 26
+ring.setAttribute('stroke-dasharray', circumference.toFixed(2));
+</script>
+
 
 </body>
 </html>

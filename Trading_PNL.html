@@ -280,8 +280,8 @@ async function fetchNearestBuy() {
 }
 
 /* ====== Core Table Builder ====== */
+
 function buildTable(currentPrice) {
-  // ensure numbers
   const start = parseFloat(document.getElementById('startPrice').value) || defaultValues.startPrice;
   const end   = parseFloat(document.getElementById('endPrice').value) || defaultValues.endPrice;
   const step  = Math.abs(parseFloat(document.getElementById('step').value) || defaultValues.step);
@@ -294,7 +294,7 @@ function buildTable(currentPrice) {
   const feeRate = 0.002;
   const buys = [];
   for (let p = start; p >= end; p -= step) buys.push(p);
-  buys.reverse(); // inverted so earliest buy at bottom
+  buys.reverse();
 
   buys.forEach(buyPrice => {
     const cost = lot * buyPrice;
@@ -302,53 +302,40 @@ function buildTable(currentPrice) {
     const gross = currentValue - cost;
     const fee   = cost * feeRate;
     const net   = gross - fee;
-    const showPnl = buyPrice > lastBuy; // PNL only shown for buys >= selected threshold
+    const showPnl = buyPrice > lastBuy;
+
+    // --- Skip row if it has no PNL ---
+    if (!showPnl) return;
 
     const tr = document.createElement('tr');
 
-    // Create cells
     const tdPrice = document.createElement('td'); tdPrice.textContent = buyPrice.toFixed(2);
     const tdEth   = document.createElement('td'); tdEth.textContent = lot.toFixed(4);
     const tdCost  = document.createElement('td'); tdCost.textContent = cost.toFixed(2);
     const tdCur   = document.createElement('td'); tdCur.textContent = currentValue.toFixed(2);
 
-    const tdGross = document.createElement('td');
-    tdGross.textContent = showPnl ? gross.toFixed(2) : '';
-    if (showPnl) tdGross.className = gross >= 0 ? 'profit' : 'loss';
+    const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
+    tdGross.className = gross >= 0 ? 'profit' : 'loss';
 
-    const tdFee = document.createElement('td');
-    tdFee.textContent = showPnl ? fee.toFixed(2) : '';
+    const tdFee = document.createElement('td'); tdFee.textContent = fee.toFixed(2);
 
-    const tdNet = document.createElement('td');
-    tdNet.textContent = showPnl ? net.toFixed(2) : '';
-    if (showPnl) tdNet.className = net >= 0 ? 'profit' : 'loss';
+    const tdNet = document.createElement('td'); tdNet.textContent = net.toFixed(2);
+    tdNet.className = net >= 0 ? 'profit' : 'loss';
 
-    // Action column
     const tdAction = document.createElement('td');
-    if (showPnl && net > 0) {
+    if (net > 0) {
       const btn = document.createElement('button');
       btn.className = 'btn-close';
       btn.textContent = 'Close';
-      btn.title = `Sell ${lot} ETH (market) and place limit buy at ${buyPrice.toFixed(2)}`;
-      btn.addEventListener('click', () => await closeAndRebuy(buyPrice, lot, btn));
+      btn.addEventListener('click', () => closeAndRebuy(buyPrice, lot, btn));
       tdAction.appendChild(btn);
-    } else {
-      tdAction.textContent = '';
     }
 
-    // Append all tds
-    tr.appendChild(tdPrice);
-    tr.appendChild(tdEth);
-    tr.appendChild(tdCost);
-    tr.appendChild(tdCur);
-    tr.appendChild(tdGross);
-    tr.appendChild(tdFee);
-    tr.appendChild(tdNet);
-    tr.appendChild(tdAction);
-
+    tr.append(tdPrice, tdEth, tdCost, tdCur, tdGross, tdFee, tdNet, tdAction);
     tbody.appendChild(tr);
   });
 }
+
 
 /* ====== Close & Re-buy action (POST to server-side tradeAction.php) ====== */
 async function closeAndRebuy(price, eth, btn) {

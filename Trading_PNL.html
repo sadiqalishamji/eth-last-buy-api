@@ -435,27 +435,23 @@ async function fetchBalance() {
 /* ====== Refresh logic (safe with fallbacks) ====== */
 let _refreshRunning = false;
 async function safeRefresh() {
-  if (_refreshRunning) return; // avoid overlapping refreshes
-  _refreshRunning = true;
+  refreshBusy = true;
   try {
-    // prefer server-provided nearest buy which includes current price
-    const nearest = await fetchNearestBuy(); // returns {nearestBuy, currentPrice}
+    const nearest = await fetchNearestBuy();
     let currentPrice = nearest.currentPrice;
     if (!currentPrice || currentPrice === 0) {
-      // fallback to public price
       currentPrice = await fetchCurrentPrice();
-    } else {
-      // ensure UI shows the fetched current price
-      document.getElementById('currentPriceDisplay').textContent = parseFloat(currentPrice).toFixed(2);
     }
-
-    const usdtFree = await fetchBalance();  // updates UI element
-
+    document.getElementById("currentPriceDisplay").textContent = parseFloat(currentPrice).toFixed(2);
+    await fetchBalance();
     buildTable(currentPrice);
+  } catch (err) {
+    console.error("Refresh failed:", err);
   } finally {
-    _refreshRunning = false;
+    refreshBusy = false;
   }
 }
+
 
 /* ====== Initialization ====== */
 loadInputs();

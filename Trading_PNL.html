@@ -462,27 +462,50 @@ loadInputs();
 safeRefresh();
 //setInterval(safeRefresh, 3000); // refresh every 5 seconds
 
-setInterval(async () => {
-  // countdown logic
-  refreshRemaining -= 0.1;
-  if (refreshRemaining <= 0) refreshRemaining = 0;
+const refreshIntervalSec = 5;
+let refreshRemaining = refreshIntervalSec;
+let refreshBusy = false;
 
-  // update text
-  const sec = Math.ceil(refreshRemaining);
-  t1.textContent = sec;
-  t2.textContent = sec;
+window.addEventListener("DOMContentLoaded", () => {
+  const ring  = document.getElementById("refreshRing");
+  const time1 = document.getElementById("refreshTimeText");
+  const time2 = document.getElementById("refreshText");
 
-  // update ring progress
-  const progress = 1 - (refreshRemaining / refreshIntervalSec);
-  const offset = circumference * (1 - progress);
-  ring.setAttribute('stroke-dashoffset', offset.toFixed(2));
-
-  // trigger refresh exactly when timer reaches 0
-  if (refreshRemaining === 0) {
-    await safeRefresh();
-    refreshRemaining = refreshIntervalSec;
+  if (!ring || !time1 || !time2) {
+    console.error("Refresh timer UI elements missing. Timer aborted.");
+    return;
   }
-}, 100);
+
+  const r = 26;
+  const circumference = 2 * Math.PI * r;
+  ring.setAttribute("stroke-dasharray", circumference.toFixed(2));
+
+  setInterval(() => {
+    if (refreshBusy) return;
+
+    refreshRemaining -= 1;
+    if (refreshRemaining < 0) refreshRemaining = 0;
+
+    // update text
+    time1.textContent = refreshRemaining;
+    time2.textContent = refreshRemaining;
+
+    // update progress ring
+    const progress = 1 - (refreshRemaining / refreshIntervalSec);
+    const offset = circumference * (1 - progress);
+    ring.setAttribute("stroke-dashoffset", offset.toFixed(2));
+
+    // refresh when done
+    if (refreshRemaining === 0) {
+      refreshBusy = true;
+      safeRefresh().finally(() => {
+        refreshRemaining = refreshIntervalSec;
+        refreshBusy = false;
+      });
+    }
+
+  }, 1000);
+});
 
 
 </script>

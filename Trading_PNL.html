@@ -147,6 +147,18 @@
       .inputs { gap: 12px; }
       th, td { padding: 6px, 4px; font-size: 13px; }
       .btn-close { padding: 6px 8px; }
+    /* Hide table header columns */
+     #buyTable th:nth-child(4),
+     #buyTable th:nth-child(5),
+    #buyTable th:nth-child(6),
+
+    /* Hide the same columns in table rows */
+    #buyTable td:nth-child(4),
+    #buyTable td:nth-child(5),
+    #buyTable td:nth-child(6) {
+    display: none;
+  }
+
     }
 
   </style>

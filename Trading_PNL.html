@@ -148,6 +148,7 @@
       .inputs { gap: 12px; }
       th, td { padding: 6px, 4px; font-size: 13px; }
       .btn-close { padding: 6px 8px; }
+	  .hide-mobile, .col-current,.col-gross, .col-fee {display: none;}
  }
 
   </style>
@@ -235,10 +236,10 @@
         <th>Price</th>
         <th>ETH</th>
         <th>Cost</th>
-        <th>Current Value</th>
-        <th>Gross P/L</th>
-        <th>Fee 0.2%</th>
-        <th>Net P/L</th>
+        <th class="hide-mobile" >Current Value</th>
+        <th class="hide-mobile" >Gross P/L</th>
+        <th class="hide-mobile" >Fee 0.2%</th>
+        <th>PnL</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -350,10 +351,15 @@ function buildTable(currentPrice) {
     const tdEth   = document.createElement('td'); tdEth.textContent = lot.toFixed(4);
     const tdCost  = document.createElement('td'); tdCost.textContent = cost.toFixed(2);
     const tdCur   = document.createElement('td'); tdCur.textContent = currentValue.toFixed(2);
-    const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
-    tdGross.className = gross >= 0 ? 'profit' : 'loss';
-    const tdFee = document.createElement('td'); tdFee.textContent = fee.toFixed(2);
-    const tdNet = document.createElement('td'); tdNet.textContent = net.toFixed(2);
+	tdCur.className = "col-current";  // <--- Add this
+
+	const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
+	tdGross.className = (gross >= 0 ? "profit " : "loss ") + "col-gross"; // <--- Add this class
+	
+	const tdFee = document.createElement('td');tdFee.textContent = fee.toFixed(2);
+	tdFee.className = "col-fee"; // <--- Add this
+    
+	const tdNet = document.createElement('td'); tdNet.textContent = net.toFixed(2);
     tdNet.className = net >= 0 ? 'profit' : 'loss';
 
     const tdAction = document.createElement('td');

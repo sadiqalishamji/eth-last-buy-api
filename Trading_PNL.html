@@ -149,6 +149,8 @@
       th, td { padding: 6px, 4px; font-size: 13px; }
       .btn-close { padding: 6px 8px; }
 	 .hide-mobile {display: none;}
+	.gross {display: none;}
+		
  }
 
   </style>
@@ -354,7 +356,6 @@ function buildTable(currentPrice) {
 	   tdCur.className = hide-mobile
     const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
     tdGross.className = gross >= 0 ? 'profit' : 'loss';
-	  tdGross.className = hide-mobile
     const tdFee = document.createElement('td'); tdFee.textContent = fee.toFixed(2);
 	tdFee.className = hide-mobile
 	

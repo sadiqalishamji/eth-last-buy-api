@@ -351,10 +351,13 @@ function buildTable(currentPrice) {
     const tdEth   = document.createElement('td'); tdEth.textContent = lot.toFixed(4);
     const tdCost  = document.createElement('td'); tdCost.textContent = cost.toFixed(2);
     const tdCur   = document.createElement('td'); tdCur.textContent = currentValue.toFixed(2);
+	   tdCur.className = hide-mobile
     const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
     tdGross.className = gross >= 0 ? 'profit' : 'loss';
+	  tdGross.className = hide-mobile
     const tdFee = document.createElement('td'); tdFee.textContent = fee.toFixed(2);
-
+	tdFee.className = hide-mobile
+	
     const tdNet = document.createElement('td'); tdNet.textContent = net.toFixed(2);
     tdNet.className = net >= 0 ? 'profit' : 'loss';
 

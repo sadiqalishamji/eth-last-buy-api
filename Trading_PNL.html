@@ -147,19 +147,8 @@
       .inputs { gap: 12px; }
       th, td { padding: 6px, 4px; font-size: 13px; }
       .btn-close { padding: 6px 8px; }
+	  .hide-mobile {display: none;}
  }
-
-@media (max-width: 768px) {
-  /* Hide table header columns */
-  #buyTable th:nth-child(4) {display: none;}
-  #buyTable th:nth-child(5) {display: none;}
-  #buyTable th:nth-child(6) {display: none;}
-
-  /* Hide the same columns in table rows */
-  #buyTable td:nth-child(4) {display: none;}
-  #buyTable td:nth-child(5) {display: none;}
-  #buyTable td:nth-child(6) {display: none;}
-}
 
   </style>
 
@@ -170,7 +159,7 @@
   
 <!-- Refresh Countdown UI -->
 <div style="text-align:center; margin-bottom:18px;">
-<h1>ETH Buy Table</h1>
+<h1>ETH Buy Tables</h1>
   <svg width="60" height="60" viewBox="0 0 60 60">
     <circle
       id="refreshRingBg"
@@ -246,9 +235,9 @@
         <th>Buy Price</th>
         <th>ETH Bought</th>
         <th>Cost (USD)</th>
-        <th>Current Value</th>
-        <th>Gross P/L</th>
-        <th>Fee 0.2%</th>
+        <th class="hide-mobile">Current Value</th>
+        <th class="hide-mobile">Gross P/L</th>
+        <th class="hide-mobile">Fee 0.2%</th>
         <th>Net P/L</th>
         <th>Action</th>
       </tr>

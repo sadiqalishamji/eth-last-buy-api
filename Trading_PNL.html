@@ -255,7 +255,7 @@ const defaultValues = {
   endPrice: 2520,
   step: 20,
   lotSize: 0.12,
-  lastBuy: 2940
+  lastBuy: 0
 };
 
 function loadInputs() {
@@ -440,8 +440,8 @@ if (_refreshRunning) return; // avoid overlapping refreshes
 _refreshRunning = true; 
 try { 
 // prefer server-provided nearest buy which includes current price 
-const nearest = await fetchNearestBuy(); // returns {nearestBuy, currentPrice} 
-let currentPrice = nearest.currentPrice; 
+const nearest = await fetchNearestBuy(); // returns {nearestBuy} 
+let currentPrice = nearest.currentPrice;
 if (!currentPrice || currentPrice === 0) { 
 // fallback to public price 
 currentPrice = await fetchCurrentPrice(); 

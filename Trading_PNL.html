@@ -321,6 +321,7 @@ async function fetchNearestBuy() {
 /* ====== Core Table Builder ====== */
 
 function buildTable(currentPrice) {
+  let lastPositiveNet = null;
   const start = parseFloat(document.getElementById('startPrice').value) || defaultValues.startPrice;
   const end   = parseFloat(document.getElementById('endPrice').value) || defaultValues.endPrice;
   const step  = Math.abs(parseFloat(document.getElementById('step').value) || defaultValues.step);
@@ -342,6 +343,10 @@ function buildTable(currentPrice) {
     const fee   = cost * feeRate;
     const net   = gross - fee;
     const showPnl = buyPrice > lastBuy;
+    
+    if (showPnl && net > 0) {
+    lastPositiveNet = net; // overwrite → last profitable lot
+    }
 
     // --- Skip row if it has no PNL ---
     if (!showPnl) return;
@@ -375,6 +380,13 @@ function buildTable(currentPrice) {
     tr.append(tdPrice, tdEth, tdCost, tdCur, tdGross, tdFee, tdNet, tdAction);
     tbody.appendChild(tr);
   });
+
+if (lastPositiveNet !== null) {
+  document.title = `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`;
+} else {
+  document.title = 'ETH Buy Tables';
+}
+
 }
 
 

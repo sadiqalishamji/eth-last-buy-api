@@ -325,7 +325,20 @@ async function fetchNearestBuy() {
 /* ====== Core Table Builder ====== */
 
 function buildTable(currentPrice) {
+
+/* ====== Alerts Configuration ====== */
+const PROFIT_ALERT_THRESHOLD = 2; // X USDT (change anytime)
+let _blinkState = false;
+let _soundPlayed = false;
+
+// simple beep (no external file)
+const alertSound = new Audio(
+  "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAA"
+);
+
   let lastPositiveNet = null;
+let hasNegative = false;
+
   const start = parseFloat(document.getElementById('startPrice').value) || defaultValues.startPrice;
   const end   = parseFloat(document.getElementById('endPrice').value) || defaultValues.endPrice;
   const step  = Math.abs(parseFloat(document.getElementById('step').value) || defaultValues.step);
@@ -348,9 +361,14 @@ function buildTable(currentPrice) {
     const net   = gross - fee;
     const showPnl = buyPrice > lastBuy;
     
-    if (showPnl && net > 0) {
-    lastPositiveNet = net; // overwrite → last profitable lot
-    }
+	if (showPnl) {
+	 if (net > 0) {
+    	 lastPositiveNet = net; // nearest profitable lot
+  	 } else if (net < 0) {
+    	 hasNegative = true;
+  	 }
+	}
+
 
     // --- Skip row if it has no PNL ---
     if (!showPnl) return;
@@ -385,10 +403,37 @@ function buildTable(currentPrice) {
     tbody.appendChild(tr);
   });
 
+/* ====== TAB TITLE LOGIC ====== */
 if (lastPositiveNet !== null) {
-  document.title = `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`;
+
+  // 🔔 PROFIT ABOVE X → BLINK TITLE
+  if (lastPositiveNet >= PROFIT_ALERT_THRESHOLD) {
+    _blinkState = !_blinkState;
+    document.title = _blinkState
+      ? `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`
+      : `💰 PROFIT ALERT 💰`;
+    
+    // 🔔 SOUND (play once per cycle)
+    if (!_soundPlayed) {
+      alertSound.play().catch(() => {});
+      _soundPlayed = true;
+    }
+
+  } else {
+    // normal profit (no blink)
+    document.title = `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`;
+    _soundPlayed = false;
+  }
+
+} else if (hasNegative) {
+  // 🔴 LOSS INDICATOR
+  document.title = `🔴 LOSS | ETH Buy Tables`;
+  _soundPlayed = false;
+
 } else {
+  // neutral
   document.title = 'ETH Buy Tables';
+  _soundPlayed = false;
 }
 
 }

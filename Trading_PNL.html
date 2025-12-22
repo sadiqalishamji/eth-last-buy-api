@@ -384,7 +384,7 @@
       buys.reverse();
 
       // same rule as your table: only show rows where buyPrice < lastBuy
-      return buys.filter((p) => p < lastBuy);
+      return buys.filter((p) => p <= lastBuy);
     }
 
     function drawBuyLimitLines() {

@@ -679,7 +679,7 @@ function drawBuyLimitLines() {
   const lastBuy = +document.getElementById('lastBuy').value;
 
 for (let price = end; price <= start; price += step) {
-    if (price <= lastBuy) continue;
+    if (price >= lastBuy) continue;
 
     const line = candleSeries.createPriceLine({
       price,

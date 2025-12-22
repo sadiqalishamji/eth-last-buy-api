@@ -591,13 +591,17 @@ const chart = LightweightCharts.createChart(
   }
 );
 
-const candleSeries = chart.addCandlestickSeries({
-  upColor: '#16a34a',
-  downColor: '#dc2626',
-  wickUpColor: '#16a34a',
-  wickDownColor: '#dc2626',
-  borderVisible: false
-});
+const candleSeries = chart.addSeries(
+  LightweightCharts.CandlestickSeries,
+  {
+    upColor: '#16a34a',
+    downColor: '#dc2626',
+    wickUpColor: '#16a34a',
+    wickDownColor: '#dc2626',
+    borderVisible: false
+  }
+);
+
 
 let buyLines = [];
 

@@ -648,6 +648,8 @@ async function loadCandles() {
   }));
 
   candleSeries.setData(candles);
+// 🔧 CRITICAL FIX — FIT CHART TO DATA
+chart.timeScale().fitContent();
 }
 
 /* ================== DRAW BUY LIMIT LINES ================== */
@@ -662,7 +664,7 @@ function drawBuyLimitLines() {
   const lastBuy = +document.getElementById('lastBuy').value;
 
   for (let price = end; price >= start; price -= step) {
-    if (price >= lastBuy) continue;
+    if (price <= lastBuy) continue;
 
     const line = candleSeries.createPriceLine({
       price,

@@ -183,9 +183,6 @@ const chart = LightweightCharts.createChart(
 
 const candleSeries = chart.addCandlestickSeries();
 
-
-loadCandles();
-
 </script>
 
 <!-- Refresh Countdown UI -->
@@ -542,6 +539,7 @@ async function loadCandles() {
   );
 }
 
+loadCandles();
 
 let buyLines = [];
 function drawBuyLines() {

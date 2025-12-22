@@ -334,10 +334,9 @@ function getBuyPricesFromInputs() {
 
 function drawBuyLimitLines() {
   if (!candleSeries) return;
-
   clearBuyLines();
 
-  const buyPrices = getBuyPricesFromInputs().slice(-20);
+  const buyPrices = getBuyPricesFromInputs().slice(-20); // or slice(-20) optional
   buyPrices.forEach((price) => {
     const line = candleSeries.createPriceLine({
       price,
@@ -346,7 +345,7 @@ function drawBuyLimitLines() {
       lineStyle: LightweightCharts.LineStyle.Solid,
       axisLabelVisible: true,
       title: `BUY ${price.toFixed(0)}`,
-      autoScale: false,   // ✅ IMPORTANT: stops chart from shrinking
+      autoScale: false, // ✅ stops shrinking
     });
     buyLineRefs.push(line);
   });
@@ -356,7 +355,6 @@ function drawBuyLimitLines() {
 let marketLineRef = null;
 function drawMarketPriceLine(currentPrice) {
   if (!candleSeries || !currentPrice) return;
-
   if (marketLineRef) candleSeries.removePriceLine(marketLineRef);
 
   marketLineRef = candleSeries.createPriceLine({
@@ -366,7 +364,7 @@ function drawMarketPriceLine(currentPrice) {
     lineStyle: LightweightCharts.LineStyle.Dashed,
     axisLabelVisible: true,
     title: `MKT ${parseFloat(currentPrice).toFixed(2)}`,
-    autoScale: false,   // ✅ IMPORTANT
+    autoScale: false, // ✅
   });
 }
 
@@ -599,7 +597,7 @@ async function closeAndRebuy(price, eth, btn) {
     btn.disabled = false;
     btn.textContent = originalText;
   }
-}
+}	
 
 /* ===================== SAFE REFRESH ===================== */
 let _refreshRunning = false;
@@ -624,6 +622,7 @@ async function safeRefresh() {
     // update chart overlays
     drawBuyLimitLines();
     drawMarketPriceLine(currentPrice);
+   if (chart) chart.timeScale().fitContent(); 
 
   } finally {
     _refreshRunning = false;

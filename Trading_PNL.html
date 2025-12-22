@@ -77,25 +77,25 @@
       outline: 3px solid rgba(0,123,255,0.08);
     }
 
-    table {
+    .table.buy-table{
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
       margin: 0 auto;
     }
 
-    th, td {
+    .table.buy-table th, td {
       border: 1px solid #ddd;
       padding: 8px 4px;
       text-align: center;
       white-space: nowrap;
-     /*  min-width: 70px;*/
-     /*  max-width: 110px;*/
+      min-width: 70px;
+      max-width: 110px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    th {
+    table.buy-table th {
       background: #007bff;
       color: #fff;
       font-weight: 600;
@@ -205,7 +205,7 @@
   </div>
 
   <div class="table-wrapper">
-    <table id="buyTable">
+    <table id="buyTable" class="buy-table">
       <thead>
         <tr>
           <th>Price</th>

@@ -661,8 +661,8 @@ function drawBuyLimitLines() {
   const step  = Math.abs(+document.getElementById('step').value);
   const lastBuy = +document.getElementById('lastBuy').value;
 
-  for (let price = start; price >= end; price -= step) {
-    if (price <= lastBuy) continue;
+  for (let price = end; price >= start; price -= step) {
+    if (price >= lastBuy) continue;
 
     const line = candleSeries.createPriceLine({
       price,

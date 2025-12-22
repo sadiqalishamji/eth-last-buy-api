@@ -361,11 +361,18 @@
 
     async function loadChartOnce() {
       if (!chart) initChart();
-      const candles = await fetchCandles("15m", 120);
+      const candles = await fetchCandles("15m", 120); // try 80 / 120 / 150
       candleSeries.setData(candles);
 
       _lastCandleTime = candles.length ? candles[candles.length - 1].time : 0;
-      chart.timeScale().fitContent();
+      //chart.timeScale().fitContent();
+
+ // ✅ zoom in: show only last 60 bars on screen
+  chart.timeScale().setVisibleLogicalRange({
+    from: Math.max(0, candles.length - 60),
+    to: candles.length - 1,
+  });
+
     }
 
     function clearBuyLines() {

@@ -596,19 +596,27 @@ const chart = LightweightCharts.createChart(chartContainer, {
     background: { color: '#ffffff' },
     textColor: '#111827'
   },
+
   grid: {
     vertLines: { color: '#e5e7eb' },
     horzLines: { color: '#e5e7eb' }
   },
-  rightPriceScale: { borderColor: '#d1d5db' },
-  timeScale: {
-  timeVisible: true,
-  secondsVisible: false,
-  rightBarStaysOnScroll: true,
-  borderColor: '#d1d5db'
-}
 
+  rightPriceScale: {
+    autoScale: true,
+    scaleMargins: {
+      top: 0.15,
+      bottom: 0.15
+    },
+    borderColor: '#d1d5db'
+  },
+
+  timeScale: {
+    timeVisible: true,
+    secondsVisible: false
+  }
 });
+
 
 function resizeChart() {
   chart.applyOptions({
@@ -623,17 +631,14 @@ window.addEventListener('resize', resizeChart);
 setTimeout(resizeChart, 100);
 
 
-const candleSeries = chart.addSeries(
-  LightweightCharts.CandlestickSeries,
-  {
-    upColor: '#16a34a',
-    downColor: '#dc2626',
-    wickUpColor: '#16a34a',
-    wickDownColor: '#dc2626',
-    borderVisible: false
-  }
-);
-
+const line = candleSeries.createPriceLine({
+  price,
+  color: '#22c55e',
+  lineWidth: 2,
+  axisLabelVisible: true,
+  title: 'Buy Limit',
+  priceScaleId: 'overlay'   // 🔥 IMPORTANT
+});
 
 let buyLines = [];
 
@@ -664,6 +669,13 @@ async function loadCandles() {
     from: candles.length - 80,
     to: candles.length
   });
+
+
+chart.priceScale('overlay').applyOptions({
+  autoScale: false,
+  visible: true
+});
+
 }
 
 

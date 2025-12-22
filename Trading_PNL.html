@@ -163,28 +163,14 @@
 <div class="container">
   
 <!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget-container">
-  <div id="tradingview_eth"></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-  <script type="text/javascript">
-    new TradingView.widget({
-      "width": "100%",
-      "height": 500,
-      "symbol": "BINANCE:ETHUSDT",
-      "interval": "5",
-      "timezone": "Asia/Karachi",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "toolbar_bg": "#0f172a",
-      "enable_publishing": false,
-      "allow_symbol_change": false,
-      "container_id": "tradingview_eth"
-    });
-  </script>
-</div>
+
+<div id="ethChart" style="height:500px;"></div>
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
 <!-- TradingView Widget END -->
 
+loadCandles();
 
 <!-- Refresh Countdown UI -->
 <div style="text-align:center; margin-bottom:18px;">
@@ -522,6 +508,47 @@ async function fetchBalance() {
   }
 }
 
+/* ====== Draw Lines on chart  ====== */ 
+async function loadCandles() {
+  const res = await fetch(
+    "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=15m&limit=200"
+  );
+  const data = await res.json();
+
+  candleSeries.setData(
+    data.map(d => ({
+      time: d[0] / 1000,
+      open: +d[1],
+      high: +d[2],
+      low: +d[3],
+      close: +d[4]
+    }))
+  );
+}
+
+
+let buyLines = [];
+function drawBuyLines() {
+  // clear old lines
+  buyLines.forEach(l => candleSeries.removePriceLine(l));
+  buyLines = [];
+
+  const start = +startPrice.value;
+  const end   = +endPrice.value;
+  const step  = +step.value;
+
+  for (let p = start; p >= end; p -= step) {
+    const line = candleSeries.createPriceLine({
+      price: p,
+      color: '#22c55e',
+      lineWidth: 1,
+      axisLabelVisible: true,
+      title: 'Buy'
+    });
+    buyLines.push(line);
+  }
+}
+
 
 /* ====== Refresh logic (safe with fallbacks) ====== */ 
 let _refreshRunning = false; 
@@ -543,7 +570,8 @@ document.getElementById('currentPriceDisplay').textContent = parseFloat(currentP
 
 const usdtFree = await fetchBalance(); // updates UI element 
 
-buildTable(currentPrice); 
+buildTable(currentPrice);
+drawBuyLines();
 } finally { 
 _refreshRunning = false; 
 } 

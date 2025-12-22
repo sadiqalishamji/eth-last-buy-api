@@ -170,7 +170,23 @@
 
 <!-- TradingView Widget END -->
 
-<script>loadCandles();</script>
+<script>
+
+const chart = LightweightCharts.createChart(
+  document.getElementById('ethChart'),
+  {
+    layout: { background: { color: '#ffffff' }, textColor: '#111' },
+    grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
+    timeScale: { timeVisible: true }
+  }
+);
+
+const candleSeries = chart.addCandlestickSeries();
+
+
+loadCandles();
+
+</script>
 
 <!-- Refresh Countdown UI -->
 <div style="text-align:center; margin-bottom:18px;">

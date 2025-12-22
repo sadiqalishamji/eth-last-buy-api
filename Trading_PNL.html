@@ -77,32 +77,35 @@
       outline: 3px solid rgba(0,123,255,0.08);
     }
 
-    .table.buy-table{
+    table{
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
       margin: 0 auto;
     }
 
-    .table.buy-table th, td {
-      border: 1px solid #ddd;
-      padding: 8px 4px;
-      text-align: center;
-      white-space: nowrap;
-      min-width: 70px;
-      max-width: 110px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+ #buyTable th,
+#buyTable td {
+  border: 1px solid #ddd;
+  padding: 8px 4px;
+  text-align: center;
+  white-space: nowrap;
+  min-width: 70px;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    table.buy-table th {
-      background: #007bff;
-      color: #fff;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 13px;
-      letter-spacing: 0.3px;
-    }
+
+#buyTable th {
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
 
     tr:nth-child(even) { background: #f8fafc; }
     tr:hover { background: rgba(0,123,255,0.03); }
@@ -129,6 +132,16 @@
 	
  #chartWrap { width:100%; }
   #ethChart { width:100%; height:320px; display:block; }
+
+#ethChart table td,
+#ethChart table th {
+  min-width: unset !important;
+  max-width: unset !important;
+  white-space: normal !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
 
 @media (max-width: 720px) {
   #ethChart { height: 220px; }
@@ -205,7 +218,7 @@
   </div>
 
   <div class="table-wrapper">
-    <table id="buyTable" class="buy-table">
+    <table id="buyTable">
       <thead>
         <tr>
           <th>Price</th>

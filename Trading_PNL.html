@@ -164,26 +164,12 @@
   
 <!-- TradingView Widget BEGIN -->
 
-<div id="ethChart" style="height:500px;"></div>
+<div id="ethChart" style="height:500px; width:100%;"></div>
 
 <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
 <!-- TradingView Widget END -->
 
-<script>
-
-const chart = LightweightCharts.createChart(
-  document.getElementById('ethChart'),
-  {
-    layout: { background: { color: '#ffffff' }, textColor: '#111' },
-    grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
-    timeScale: { timeVisible: true }
-  }
-);
-
-const candleSeries = chart.addCandlestickSeries();
-
-</script>
 
 <!-- Refresh Countdown UI -->
 <div style="text-align:center; margin-bottom:18px;">
@@ -521,48 +507,6 @@ async function fetchBalance() {
   }
 }
 
-/* ====== Draw Lines on chart  ====== */ 
-async function loadCandles() {
-  const res = await fetch(
-    "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=15m&limit=200"
-  );
-  const data = await res.json();
-
-  candleSeries.setData(
-    data.map(d => ({
-      time: d[0] / 1000,
-      open: +d[1],
-      high: +d[2],
-      low: +d[3],
-      close: +d[4]
-    }))
-  );
-}
-
-loadCandles();
-
-let buyLines = [];
-function drawBuyLines() {
-  // clear old lines
-  buyLines.forEach(l => candleSeries.removePriceLine(l));
-  buyLines = [];
-
-  const start = +startPrice.value;
-  const end   = +endPrice.value;
-  const step  = +step.value;
-
-  for (let p = start; p >= end; p -= step) {
-    const line = candleSeries.createPriceLine({
-      price: p,
-      color: '#22c55e',
-      lineWidth: 1,
-      axisLabelVisible: true,
-      title: 'Buy'
-    });
-    buyLines.push(line);
-  }
-}
-
 
 /* ====== Refresh logic (safe with fallbacks) ====== */ 
 let _refreshRunning = false; 
@@ -585,7 +529,6 @@ document.getElementById('currentPriceDisplay').textContent = parseFloat(currentP
 const usdtFree = await fetchBalance(); // updates UI element 
 
 buildTable(currentPrice);
-drawBuyLines();
 } finally { 
 _refreshRunning = false; 
 } 
@@ -630,6 +573,107 @@ const circumference = 2 * Math.PI * 26; // r = 26
 ring.setAttribute('stroke-dasharray', circumference.toFixed(2));
 </script>
 
+<script>
+/* ================== CHART SETUP ================== */
+const chart = LightweightCharts.createChart(
+  document.getElementById('ethChart'),
+  {
+    layout: {
+      background: { color: '#ffffff' },
+      textColor: '#111827'
+    },
+    grid: {
+      vertLines: { color: '#e5e7eb' },
+      horzLines: { color: '#e5e7eb' }
+    },
+    timeScale: { timeVisible: true },
+    rightPriceScale: { borderColor: '#d1d5db' }
+  }
+);
+
+const candleSeries = chart.addCandlestickSeries({
+  upColor: '#16a34a',
+  downColor: '#dc2626',
+  wickUpColor: '#16a34a',
+  wickDownColor: '#dc2626',
+  borderVisible: false
+});
+
+let buyLines = [];
+
+/* ================== LOAD CANDLES ================== */
+async function loadCandles() {
+  const res = await fetch(
+    'https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=15m&limit=200',
+    { cache: 'no-store' }
+  );
+  const data = await res.json();
+
+  const candles = data.map(c => ({
+    time: c[0] / 1000,
+    open: +c[1],
+    high: +c[2],
+    low: +c[3],
+    close: +c[4]
+  }));
+
+  candleSeries.setData(candles);
+}
+
+/* ================== DRAW BUY LIMIT LINES ================== */
+function drawBuyLimitLines() {
+  // remove old lines
+  buyLines.forEach(l => candleSeries.removePriceLine(l));
+  buyLines = [];
+
+  const start = +document.getElementById('startPrice').value;
+  const end   = +document.getElementById('endPrice').value;
+  const step  = Math.abs(+document.getElementById('step').value);
+  const lastBuy = +document.getElementById('lastBuy').value;
+
+  for (let price = start; price >= end; price -= step) {
+    if (price <= lastBuy) continue;
+
+    const line = candleSeries.createPriceLine({
+      price,
+      color: '#22c55e',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: 'Buy Limit'
+    });
+
+    buyLines.push(line);
+  }
+}
+
+/* ================== LIVE PRICE LINE ================== */
+function drawMarketPriceLine(price) {
+  if (window.marketLine) {
+    candleSeries.removePriceLine(window.marketLine);
+  }
+
+  window.marketLine = candleSeries.createPriceLine({
+    price,
+    color: '#2563eb',
+    lineWidth: 2,
+    lineStyle: LightweightCharts.LineStyle.Dotted,
+    axisLabelVisible: true,
+    title: 'Market'
+  });
+}
+
+/* ================== HOOK INTO YOUR EXISTING REFRESH ================== */
+const _oldBuildTable = buildTable;
+buildTable = function (currentPrice) {
+  _oldBuildTable(currentPrice);
+  drawBuyLimitLines();
+  drawMarketPriceLine(currentPrice);
+};
+
+/* ================== INIT ================== */
+loadCandles();
+</script>
 
 </body>
 </html>

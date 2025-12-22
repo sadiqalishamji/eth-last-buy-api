@@ -134,12 +134,19 @@
       .hide-mobile, .col-current, .col-gross, .col-fee { display: none; }
     }
   </style>
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 
 <body>
 <div class="container">
 <div style="text-align:center; margin-bottom:18px;">
     <h1>ETH Buy Tables</h1>
+
+<div id="chartWrap" style="margin: 14px 0 18px; border:1px solid #e6edf5; border-radius:12px; overflow:hidden;">
+  <div id="ethChart" style="height: 320px; width: 100%;"></div>
+</div>
+
+
     <svg width="60" height="60" viewBox="0 0 60 60">
       <circle id="refreshRingBg" cx="30" cy="30" r="26" fill="none" stroke-width="5" stroke="#d6dce3" />
       <circle
@@ -223,6 +230,120 @@ const defaultValues = {
 
 const feeRate = 0.002;
 const PROFIT_ALERT_THRESHOLD = 2;
+
+/* ===================== CHART ===================== */
+let chart, candleSeries;
+let buyLineRefs = [];
+let _lastCandleTime = 0;
+
+function initChart() {
+  const el = document.getElementById('ethChart');
+
+  chart = LightweightCharts.createChart(el, {
+    layout: { background: { type: 'solid', color: '#ffffff' }, textColor: '#222' },
+    grid: { vertLines: { color: '#eef2f7' }, horzLines: { color: '#eef2f7' } },
+    rightPriceScale: { borderColor: '#e6edf5' },
+    timeScale: { borderColor: '#e6edf5', timeVisible: true, secondsVisible: false },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+  });
+
+  candleSeries = chart.addCandlestickSeries({
+    upColor: '#0a9d58',
+    downColor: '#d93025',
+    borderUpColor: '#0a9d58',
+    borderDownColor: '#d93025',
+    wickUpColor: '#0a9d58',
+    wickDownColor: '#d93025',
+  });
+
+  // responsive
+  const ro = new ResizeObserver(() => {
+    chart.applyOptions({ width: el.clientWidth });
+  });
+  ro.observe(el);
+}
+
+async function fetchCandles(interval = '5m', limit = 200) {
+  // Binance Klines
+  const url = `https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=${interval}&limit=${limit}`;
+  const resp = await fetch(url, { cache: "no-store" });
+  if (!resp.ok) throw new Error('Candles fetch failed');
+  const raw = await resp.json();
+
+  return raw.map(k => ({
+    time: Math.floor(k[0] / 1000),
+    open: parseFloat(k[1]),
+    high: parseFloat(k[2]),
+    low:  parseFloat(k[3]),
+    close:parseFloat(k[4]),
+  }));
+}
+
+async function loadChartOnce() {
+  if (!chart) initChart();
+  const candles = await fetchCandles('15m', 250);
+  candleSeries.setData(candles);
+
+  _lastCandleTime = candles.length ? candles[candles.length - 1].time : 0;
+
+  // fit nicely
+  chart.timeScale().fitContent();
+}
+
+function clearBuyLines() {
+  buyLineRefs.forEach(line => candleSeries.removePriceLine(line));
+  buyLineRefs = [];
+}
+
+function getBuyPricesFromInputs() {
+  const start = parseFloat(document.getElementById('startPrice').value) || defaultValues.startPrice;
+  const end   = parseFloat(document.getElementById('endPrice').value)   || defaultValues.endPrice;
+  const step  = Math.abs(parseFloat(document.getElementById('step').value) || defaultValues.step);
+  const lastBuy = parseFloat(document.getElementById('lastBuy').value)  || defaultValues.lastBuy;
+
+  const buys = [];
+  for (let p = start; p >= end; p -= step) buys.push(p);
+  buys.reverse();
+
+  // same rule as your table: only show rows where buyPrice > lastBuy
+  return buys.filter(p => p > lastBuy);
+}
+
+function drawBuyLimitLines() {
+  if (!candleSeries) return;
+
+  clearBuyLines();
+
+  const buyPrices = getBuyPricesFromInputs();
+  buyPrices.forEach((price) => {
+    const line = candleSeries.createPriceLine({
+      price,
+      color: 'rgba(0,123,255,0.55)',
+      lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: `BUY ${price.toFixed(0)}`,
+    });
+    buyLineRefs.push(line);
+  });
+}
+
+let marketLineRef = null;
+function drawMarketPriceLine(currentPrice) {
+  if (!candleSeries || !currentPrice) return;
+
+  if (marketLineRef) candleSeries.removePriceLine(marketLineRef);
+
+  marketLineRef = candleSeries.createPriceLine({
+    price: currentPrice,
+    color: 'rgba(0,0,0,0.45)',
+    lineWidth: 1,
+    lineStyle: LightweightCharts.LineStyle.Dashed,
+    axisLabelVisible: true,
+    title: `MKT ${parseFloat(currentPrice).toFixed(2)}`,
+  });
+}
+
 
 /* ===================== COUNTDOWN UI VARS (MUST BE FIRST) ===================== */
 const refreshIntervalSec = 5;
@@ -504,7 +625,15 @@ setInterval(async () => {
 
 /* ===================== INIT ===================== */
 loadInputs();
-safeRefresh();
+
+loadChartOnce()
+  .then(() => safeRefresh())
+  .catch(err => {
+    console.error("Chart init error:", err);
+    // chart fail ho bhi jaye, table still works
+    safeRefresh();
+  });
+
 </script>
 
 </body>

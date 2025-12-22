@@ -2,14 +2,15 @@
 <html>
 <head>
   <meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETH Buy Tables</title>
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+
   <style>
-    /* Base Layout */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -34,7 +35,6 @@
       font-weight: 700;
     }
 
-    /* API Info Display */
     #fetchedInfo {
       text-align: center;
       margin-bottom: 24px;
@@ -49,7 +49,6 @@
       background: rgba(0,0,0,0.03);
     }
 
-    /* Inputs Panel */
     .inputs {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -58,10 +57,7 @@
       padding: 6px;
     }
 
-    .inputs div {
-      display: flex;
-      flex-direction: column;
-    }
+    .inputs div { display: flex; flex-direction: column; }
 
     .inputs label {
       font-weight: 600;
@@ -81,23 +77,22 @@
       outline: 3px solid rgba(0,123,255,0.08);
     }
 
-    /* Table Styles */
     table {
-		width: 100%; 
+      width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      margin: 0 auto; 
+      margin: 0 auto;
     }
 
     th, td {
-     border: 1px solid #ddd;
-     padding: 8px 4px;   /* Vertical 8px, Horizontal 4px (tight) */
-     text-align: center;
-     white-space: nowrap; /* Prevent text stretching column width */
-     min-width: 70px;     /* restrict column width */
-     max-width: 110px;    /* prevent extra wide columns */
-     overflow: hidden;
-     text-overflow: ellipsis;
+      border: 1px solid #ddd;
+      padding: 8px 4px;
+      text-align: center;
+      white-space: nowrap;
+      min-width: 70px;
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     th {
@@ -109,36 +104,13 @@
       letter-spacing: 0.3px;
     }
 
-    tr:nth-child(even) {
-      background: #f8fafc;
-    }
+    tr:nth-child(even) { background: #f8fafc; }
+    tr:hover { background: rgba(0,123,255,0.03); }
 
-    tr:hover {
-      background: rgba(0,123,255,0.03);
-    }
+    .profit { color: #0a9d58; font-weight: 700; }
+    .loss   { color: #d93025; font-weight: 700; }
 
-    /* Profit/Loss Coloring */
-    .profit {
-      color: #0a9d58; /* Green */
-      font-weight: 700;
-    }
-
-    .loss {
-      color: #d93025; /* Red */
-      font-weight: 700;
-    }
-
-#ethChartWrapper {
-  width: 100%;
-  max-width: 100%;
-}
-
-#ethChart {
-  width: 100%;
-  height: 500px;
-}
-
-    /* Close Button */
+ 
     .btn-close {
       padding: 6px 10px;
       font-size: 13px;
@@ -150,75 +122,52 @@
       color: #fff;
       transition: 0.14s ease;
     }
-    .btn-close:hover { 
-     transform: translateY(-1px); 
-     opacity: 0.95; 
-     }
-     #errorMsg { color:#d93025; }
-     #successMsg { color:#0a9d58; }
- 
-    /* Small screens */
+    .btn-close:hover { transform: translateY(-1px); opacity: 0.95; }
+
+    .errorMsg { color:#d93025; }
+    .successMsg { color:#0a9d58; }
+
     @media (max-width: 720px) {
       .inputs { gap: 12px; }
-      th, td { padding: 6px, 4px; font-size: 13px; }
+      th, td { padding: 6px 4px; font-size: 13px; } /* FIX: comma removed */
       .btn-close { padding: 6px 8px; }
-	  .hide-mobile, .col-current,.col-gross, .col-fee {display: none;}
- }
-
+      .hide-mobile, .col-current, .col-gross, .col-fee { display: none; }
+    }
   </style>
-
 </head>
+
 <body>
-
 <div class="container">
-  
-<!-- Refresh Countdown UI -->
 <div style="text-align:center; margin-bottom:18px;">
-<h1>ETH Buy Tables</h1>
-  <svg width="60" height="60" viewBox="0 0 60 60">
-    <circle
-      id="refreshRingBg"
-      cx="30" cy="30" r="26"
-      fill="none" stroke-width="5"
-      stroke="#d6dce3"
-    />
-    <circle
-      id="refreshRing"
-      cx="30" cy="30" r="26"
-      fill="none" stroke-width="5"
-      stroke="#007bff"
-      stroke-linecap="round"
-      stroke-dasharray="163.36"
-      stroke-dashoffset="0"
-      transform="rotate(-90 30 30)"
-    />
-    <text
-      id="refreshTimeText"
-      x="30" y="35"
-      font-size="16"
-      text-anchor="middle"
-      fill="#333"
-      font-weight="600"
-    >5</text>
-  </svg>
-  <div style="margin-top:6px; font-weight:600; color:#444; font-size:13px;">
-    Refreshing in <span id="refreshText">5</span>s
+    <h1>ETH Buy Tables</h1>
+    <svg width="60" height="60" viewBox="0 0 60 60">
+      <circle id="refreshRingBg" cx="30" cy="30" r="26" fill="none" stroke-width="5" stroke="#d6dce3" />
+      <circle
+        id="refreshRing"
+        cx="30" cy="30" r="26"
+        fill="none" stroke-width="5"
+        stroke="#007bff"
+        stroke-linecap="round"
+        stroke-dasharray="163.36"
+        stroke-dashoffset="0"
+        transform="rotate(-90 30 30)"
+      />
+      <text id="refreshTimeText" x="30" y="35" font-size="16" text-anchor="middle" fill="#333" font-weight="600">5</text>
+    </svg>
+    <div style="margin-top:6px; font-weight:600; color:#444; font-size:13px;">
+      Refreshing in <span id="refreshText">5</span>s
+    </div>
   </div>
-</div>
 
+  <div id="statusMsg" style="text-align:center; margin:10px 0; font-weight:600; color:#007bff;"></div>
 
- <!--Current status of closing lots  -->
-<div id="statusMsg" style="text-align:center; margin:10px 0; font-weight:600; color:#007bff;"></div>
-
-  <!-- API Fetch Confirmation Panel -->
   <div id="fetchedInfo">
     ETH Price: <span id="currentPriceDisplay">-</span> &nbsp; | &nbsp;
     Nearest Buy order: <span id="lastBuyDisplay">-</span> &nbsp; | &nbsp;
-    Available : <span id="usdtBalance">-</span>&nbsp; | &nbsp;
+    Available : <span id="usdtBalance">-</span> &nbsp; | &nbsp;
     Error: <span id="jasonerror">-</span>
-</div>
+  </div>
 
-  <!-- Inputs -->
   <div class="inputs">
     <div>
       <label>Start Price</label>
@@ -242,28 +191,28 @@
     </div>
   </div>
 
-<div class="table-wrapper">
-  <!-- Table -->
-  <table id="buyTable">
-    <thead>
-      <tr>
-        <th>Price</th>
-        <th>ETH</th>
-        <th>Cost</th>
-        <th class="hide-mobile" >Current Value</th>
-        <th class="hide-mobile" >Gross P/L</th>
-        <th class="hide-mobile" >Fee 0.2%</th>
-        <th>PnL</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-	</div>
+  <div class="table-wrapper">
+    <table id="buyTable">
+      <thead>
+        <tr>
+          <th>Price</th>
+          <th>ETH</th>
+          <th>Cost</th>
+          <th class="hide-mobile">Current Value</th>
+          <th class="hide-mobile">Gross P/L</th>
+          <th class="hide-mobile">Fee 0.2%</th>
+          <th>PnL</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
 </div>
 
 <script>
-/* ====== Defaults & Inputs Persistence ====== */
+/* ===================== CONFIG ===================== */
 const defaultValues = {
   startPrice: 5000,
   endPrice: 2520,
@@ -272,23 +221,38 @@ const defaultValues = {
   lastBuy: 0
 };
 
+const feeRate = 0.002;
+const PROFIT_ALERT_THRESHOLD = 2;
+
+/* ===================== COUNTDOWN UI VARS (MUST BE FIRST) ===================== */
+const refreshIntervalSec = 5;
+let refreshRemaining = refreshIntervalSec;
+
+const ring = document.getElementById('refreshRing');
+const t1   = document.getElementById('refreshTimeText');
+const t2   = document.getElementById('refreshText');
+
+const circumference = 2 * Math.PI * 26;
+ring.setAttribute('stroke-dasharray', circumference.toFixed(2));
+
+/* ===================== INPUTS PERSIST ===================== */
 function loadInputs() {
   for (const key in defaultValues) {
     const input = document.getElementById(key);
     const saved = localStorage.getItem(key);
     input.value = saved !== null ? saved : defaultValues[key];
+
     input.addEventListener('input', () => {
       localStorage.setItem(key, input.value);
-      // Rebuild immediately for instant feedback
       safeRefresh();
     });
   }
 }
 
-/* ====== Fetch Current Price (public endpoint) ====== */
+/* ===================== FETCH PRICE (PUBLIC) ===================== */
 async function fetchCurrentPrice() {
   try {
-    const resp = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT', {cache: "no-store"});
+    const resp = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT', { cache: "no-store" });
     if (!resp.ok) throw new Error('Price fetch failed');
     const data = await resp.json();
     const price = parseFloat(data.price);
@@ -297,107 +261,121 @@ async function fetchCurrentPrice() {
   } catch (err) {
     console.error('fetchCurrentPrice error', err);
     document.getElementById('currentPriceDisplay').textContent = '-';
-    return parseFloat(defaultValues.lastBuy); // fallback so UI doesn't break
+    return parseFloat(document.getElementById('lastBuy').value || defaultValues.lastBuy) || 0;
   }
 }
 
-/* ====== Fetch nearest isolated LIMIT buy via server-side API (Render) ====== */
+/* ===================== FETCH NEAREST BUY (SERVER) ===================== */
 async function fetchNearestBuy() {
   try {
-    const resp = await fetch('getNearestBuy.php', {cache: "no-store"});
+    const resp = await fetch('getNearestBuy.php', { cache: "no-store" });
     if (!resp.ok) throw new Error('Nearest-buy fetch failed');
     const data = await resp.json();
+
     const lastBuyInput = document.getElementById('lastBuy');
-	
-  if (data.status === "error") {
-      // Show the Binance error message
-      document.getElementById('jasonerror').textContent = data.msg;
-      console.error("Binance detail:", data.binanceResponse);
-      return; // stop further processing
+
+    // If your PHP returns error like: {status:"error", msg:"...", binanceResponse:{...}}
+    if (data.status === "error") {
+      document.getElementById('jasonerror').textContent = data.msg || 'Server error';
+      console.error("Binance detail:", data.binanceResponse || data);
+      document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value || '-';
+      return {
+        nearestBuy: parseFloat(lastBuyInput.value || 0),
+        currentPrice: data.currentPrice ? parseFloat(data.currentPrice) : null
+      };
+    } else {
+      document.getElementById('jasonerror').textContent = '-';
     }
 
     if (data.nearestBuyPrice && parseFloat(data.nearestBuyPrice) > 0) {
       lastBuyInput.value = parseFloat(data.nearestBuyPrice).toFixed(2);
       localStorage.setItem('lastBuy', lastBuyInput.value);
     }
-    // update display fields
+
     document.getElementById('lastBuyDisplay').textContent = lastBuyInput.value || '-';
-    return { nearestBuy: parseFloat(lastBuyInput.value || 0)};
+
+    return {
+      nearestBuy: parseFloat(lastBuyInput.value || 0),
+      currentPrice: data.currentPrice ? parseFloat(data.currentPrice) : null
+    };
 
   } catch (err) {
     console.error('fetchNearestBuy error', err);
     document.getElementById('lastBuyDisplay').textContent = document.getElementById('lastBuy').value || '-';
-    document.getElementById('jasonerror').textContent = err;
-    return { nearestBuy: parseFloat(document.getElementById('lastBuy').value || 0), currentPrice: null };
+    document.getElementById('jasonerror').textContent = String(err);
+    return {
+      nearestBuy: parseFloat(document.getElementById('lastBuy').value || 0),
+      currentPrice: null
+    };
   }
 }
 
-/* ====== Core Table Builder ====== */
+/* ===================== FETCH BALANCE ===================== */
+async function fetchBalance() {
+  try {
+    const resp = await fetch('getBalance.php', { cache: 'no-store' });
+    const data = await resp.json();
+    const bal = parseFloat(data.freeUSDT ?? 0) || 0;
+    document.getElementById('usdtBalance').textContent = bal.toFixed(2) + ' USDT';
+    return bal;
+  } catch (e) {
+    console.error("Balance fetch error", e);
+    document.getElementById('usdtBalance').textContent = '-';
+    return 0;
+  }
+}
 
-function buildTable(currentPrice) {
-
-/* ====== Alerts Configuration ====== */
-const PROFIT_ALERT_THRESHOLD = 2; // X USDT (change anytime)
+/* ===================== TABLE BUILDER ===================== */
 let _blinkState = false;
 let _soundPlayed = false;
+const alertSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAA");
 
-// simple beep (no external file)
-const alertSound = new Audio(
-  "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAA"
-);
-
+function buildTable(currentPrice) {
   let lastPositiveNet = null;
-let hasNegative = false;
+  let hasNegative = false;
 
   const start = parseFloat(document.getElementById('startPrice').value) || defaultValues.startPrice;
-  const end   = parseFloat(document.getElementById('endPrice').value) || defaultValues.endPrice;
+  const end   = parseFloat(document.getElementById('endPrice').value)   || defaultValues.endPrice;
   const step  = Math.abs(parseFloat(document.getElementById('step').value) || defaultValues.step);
-  const lot   = parseFloat(document.getElementById('lotSize').value) || defaultValues.lotSize;
-  const lastBuy = parseFloat(document.getElementById('lastBuy').value) || defaultValues.lastBuy;
+  const lot   = parseFloat(document.getElementById('lotSize').value)    || defaultValues.lotSize;
+  const lastBuy = parseFloat(document.getElementById('lastBuy').value)  || defaultValues.lastBuy;
 
   const tbody = document.querySelector('#buyTable tbody');
   tbody.innerHTML = '';
 
-  const feeRate = 0.002;
   const buys = [];
   for (let p = start; p >= end; p -= step) buys.push(p);
   buys.reverse();
 
   buys.forEach(buyPrice => {
+    const showPnl = buyPrice > lastBuy;
+    if (!showPnl) return; // skip rows without PnL
+
     const cost = lot * buyPrice;
     const currentValue = lot * currentPrice;
     const gross = currentValue - cost;
     const fee   = cost * feeRate;
     const net   = gross - fee;
-    const showPnl = buyPrice > lastBuy;
-    
-	if (showPnl) {
-	 if (net > 0) {
-    	 lastPositiveNet = net; // nearest profitable lot
-  	 } else if (net < 0) {
-    	 hasNegative = true;
-  	 }
-	}
 
-
-    // --- Skip row if it has no PNL ---
-    if (!showPnl) return;
+    if (net > 0) lastPositiveNet = net;
+    if (net < 0) hasNegative = true;
 
     const tr = document.createElement('tr');
 
     const tdPrice = document.createElement('td'); tdPrice.textContent = buyPrice.toFixed(2);
     const tdEth   = document.createElement('td'); tdEth.textContent = lot.toFixed(4);
     const tdCost  = document.createElement('td'); tdCost.textContent = cost.toFixed(2);
-    const tdCur   = document.createElement('td'); tdCur.textContent = currentValue.toFixed(2);
-	tdCur.className = "col-current";  // <--- Add this
 
-	const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
-	tdGross.className = (gross >= 0 ? "profit " : "loss ") + "col-gross"; // <--- Add this class
-	
-	const tdFee = document.createElement('td');tdFee.textContent = fee.toFixed(2);
-	tdFee.className = "col-fee"; // <--- Add this
-    
-	const tdNet = document.createElement('td'); tdNet.textContent = net.toFixed(2);
+    const tdCur   = document.createElement('td'); tdCur.textContent = currentValue.toFixed(2);
+    tdCur.className = "col-current";
+
+    const tdGross = document.createElement('td'); tdGross.textContent = gross.toFixed(2);
+    tdGross.className = (gross >= 0 ? "profit " : "loss ") + "col-gross";
+
+    const tdFee   = document.createElement('td'); tdFee.textContent = fee.toFixed(2);
+    tdFee.className = "col-fee";
+
+    const tdNet = document.createElement('td'); tdNet.textContent = net.toFixed(2);
     tdNet.className = net >= 0 ? 'profit' : 'loss';
 
     const tdAction = document.createElement('td');
@@ -413,49 +391,37 @@ let hasNegative = false;
     tbody.appendChild(tr);
   });
 
-/* ====== TAB TITLE LOGIC ====== */
-if (lastPositiveNet !== null) {
+  // TAB TITLE LOGIC
+  if (lastPositiveNet !== null) {
+    if (lastPositiveNet >= PROFIT_ALERT_THRESHOLD) {
+      _blinkState = !_blinkState;
+      document.title = _blinkState
+        ? `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`
+        : `💰 PROFIT ALERT 💰`;
 
-  // 🔔 PROFIT ABOVE X → BLINK TITLE
-  if (lastPositiveNet >= PROFIT_ALERT_THRESHOLD) {
-    _blinkState = !_blinkState;
-    document.title = _blinkState
-      ? `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`
-      : `💰 PROFIT ALERT 💰`;
-    
-    // 🔔 SOUND (play once per cycle)
-    if (!_soundPlayed) {
-      alertSound.play().catch(() => {});
-      _soundPlayed = true;
+      if (!_soundPlayed) {
+        alertSound.play().catch(() => {});
+        _soundPlayed = true;
+      }
+    } else {
+      document.title = `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`;
+      _soundPlayed = false;
     }
-
+  } else if (hasNegative) {
+    document.title = `🔴 LOSS | ETH Buy Tables`;
+    _soundPlayed = false;
   } else {
-    // normal profit (no blink)
-    document.title = `+${lastPositiveNet.toFixed(2)} USDT | ETH Buy Tables`;
+    document.title = 'ETH Buy Tables';
     _soundPlayed = false;
   }
-
-} else if (hasNegative) {
-  // 🔴 LOSS INDICATOR
-  document.title = `🔴 LOSS | ETH Buy Tables`;
-  _soundPlayed = false;
-
-} else {
-  // neutral
-  document.title = 'ETH Buy Tables';
-  _soundPlayed = false;
 }
 
-}
-
-
-/* ====== Close & Re-buy action (POST to server-side tradeAction.php) ====== */
+/* ===================== TRADE ACTION ===================== */
 async function closeAndRebuy(price, eth, btn) {
-  // Immediate UI feedback
   const msgBox = document.getElementById("statusMsg");
+  msgBox.className = "";
   msgBox.textContent = `Submitting SELL market and BUY limit for ${eth} ETH at ${price.toFixed(2)} USD`;
 
-  // Disable button and show processing
   btn.disabled = true;
   const originalText = btn.textContent;
   btn.textContent = "Processing...";
@@ -465,113 +431,80 @@ async function closeAndRebuy(price, eth, btn) {
     form.append("price", price);
     form.append("lot", eth);
 
-    const resp = await fetch("tradeAction.php", {
-      method: "POST",
-      body: form
-    });
+    const resp = await fetch("tradeAction.php", { method: "POST", body: form });
     const data = await resp.json();
 
     if (data.status === "success") {
-      // Non-blocking success message
       msgBox.textContent = `Orders submitted successfully for ${eth} ETH at ${price.toFixed(2)} USD`;
       msgBox.className = "successMsg";
       await safeRefresh();
     } else {
-      // Non-block error message
       console.error("Trade error:", data.binanceResponse || data);
       msgBox.textContent = `Trade submission failed for ${eth} ETH`;
+      msgBox.className = "errorMsg";
     }
   } catch (err) {
     console.error("Fetch exception:", err);
     msgBox.textContent = `Network error while submitting trade`;
-    msgBox.className = "errorMsg"; 
+    msgBox.className = "errorMsg";
   } finally {
-    // Restore button UI
     btn.disabled = false;
     btn.textContent = originalText;
   }
 }
 
+/* ===================== SAFE REFRESH ===================== */
+let _refreshRunning = false;
+async function safeRefresh() {
+  if (_refreshRunning) return;
+  _refreshRunning = true;
 
-/* ====== Fetch Balance of available usdt in isolated wallet ====== */
-async function fetchBalance() {
   try {
-    const resp = await fetch('getBalance.php');
-    const data = await resp.json();
-    const bal = data.freeUSDT ?? 0;
-    // update some DOM element
-    document.getElementById('usdtBalance').textContent = bal.toFixed(2) + ' USDT';
-    return bal;
-  } catch (e) {
-    console.error("Balance fetch error", e);
-    return 0;
+    const nearest = await fetchNearestBuy();
+    let currentPrice = nearest.currentPrice;
+
+    if (!currentPrice || currentPrice === 0) {
+      currentPrice = await fetchCurrentPrice();
+    } else {
+      document.getElementById('currentPriceDisplay').textContent = parseFloat(currentPrice).toFixed(2);
+    }
+
+    await fetchBalance();
+
+    buildTable(currentPrice);
+
+    // update chart overlays
+    drawBuyLimitLines();
+    drawMarketPriceLine(currentPrice);
+
+  } finally {
+    _refreshRunning = false;
   }
 }
 
+/* ===================== COUNTDOWN LOOP ===================== */
+setInterval(async () => {
+  refreshRemaining -= 0.1;
+  if (refreshRemaining <= 0) refreshRemaining = 0;
 
-/* ====== Refresh logic (safe with fallbacks) ====== */ 
-let _refreshRunning = false; 
-async function safeRefresh() { 
-if (_refreshRunning) return; // avoid overlapping refreshes 
-_refreshRunning = true; 
-try { 
-// prefer server-provided nearest buy which includes current price 
-const nearest = await fetchNearestBuy(); // returns {nearestBuy} 
-let currentPrice = nearest.currentPrice;
-if (!currentPrice || currentPrice === 0) { 
-// fallback to public price 
-currentPrice = await fetchCurrentPrice(); 
-}
-else { 
-// ensure UI shows the fetched current price 
-document.getElementById('currentPriceDisplay').textContent = parseFloat(currentPrice).toFixed(2); 
-} 
+  const sec = Math.ceil(refreshRemaining);
+  t1.textContent = sec;
+  t2.textContent = sec;
 
-const usdtFree = await fetchBalance(); // updates UI element 
+  const progress = 1 - (refreshRemaining / refreshIntervalSec);
+  const offset = circumference * (1 - progress);
+  ring.setAttribute('stroke-dashoffset', offset.toFixed(2));
 
-buildTable(currentPrice);
-} finally { 
-_refreshRunning = false; 
-} 
-} 
-
-/* ====== Initialization ====== */ 
-loadInputs(); 
-safeRefresh(); 
-//setInterval(safeRefresh, 3000); // refresh every 3 seconds 
-
-setInterval(async () => { 
-// countdown logic 
-refreshRemaining -= 0.1; 
-if (refreshRemaining <= 0) refreshRemaining = 0; 
-
-// update text 
-const sec = Math.ceil(refreshRemaining); 
-t1.textContent = sec; 
-t2.textContent = sec; 
-
-// update ring progress 
-const progress = 1 - (refreshRemaining / refreshIntervalSec); 
-const offset = circumference * (1 - progress); 
-ring.setAttribute('stroke-dashoffset', offset.toFixed(2)); 
-
-// trigger refresh exactly when timer reaches 0 
-if (refreshRemaining === 0) { 
-await safeRefresh(); 
-refreshRemaining = refreshIntervalSec; 
-} 
+  if (refreshRemaining === 0) {
+    await safeRefresh();
+    refreshRemaining = refreshIntervalSec;
+  }
 }, 100);
 
-</script>
 
-<script>
-const refreshIntervalSec = 5;
-let refreshRemaining = refreshIntervalSec;
-const ring = document.getElementById('refreshRing');
-const t1   = document.getElementById('refreshTimeText');
-const t2   = document.getElementById('refreshText');
-const circumference = 2 * Math.PI * 26; // r = 26
-ring.setAttribute('stroke-dasharray', circumference.toFixed(2));
+/* ===================== INIT ===================== */
+loadInputs();
+safeRefresh();
 </script>
 
 </body>

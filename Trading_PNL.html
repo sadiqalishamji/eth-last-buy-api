@@ -238,7 +238,14 @@ let _lastCandleTime = 0;
 function initChart() {
   const el = document.getElementById('ethChart');
 
+  // container must have real size
+  const w = el.clientWidth || 800;
+  const h = el.clientHeight || 320;
+
   chart = LightweightCharts.createChart(el, {
+    width: w,
+    height: h,
+
     layout: { background: { type: 'solid', color: '#ffffff' }, textColor: '#222' },
     grid: { vertLines: { color: '#eef2f7' }, horzLines: { color: '#eef2f7' } },
     rightPriceScale: { borderColor: '#e6edf5' },
@@ -255,17 +262,19 @@ function initChart() {
     wickDownColor: '#d93025',
   };
 
-  // ✅ Works on old + new LightweightCharts
   if (typeof chart.addCandlestickSeries === "function") {
     candleSeries = chart.addCandlestickSeries(candleOpts);
-  } else if (typeof chart.addSeries === "function" && LightweightCharts.CandlestickSeries) {
-    candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, candleOpts);
   } else {
-    throw new Error("Candlestick series API not found. Check lightweight-charts build/version.");
+    candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, candleOpts);
   }
 
-  // responsive
-  const ro = new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth }));
+  // resize: update BOTH width & height
+  const ro = new ResizeObserver(() => {
+    const nw = el.clientWidth;
+    const nh = el.clientHeight;
+    chart.applyOptions({ width: nw, height: nh });
+    chart.timeScale().fitContent();
+  });
   ro.observe(el);
 }
 

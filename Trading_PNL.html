@@ -337,7 +337,7 @@ function drawBuyLimitLines() {
 
   clearBuyLines();
 
-  const buyPrices = getBuyPricesFromInputs();
+  const buyPrices = getBuyPricesFromInputs().slice(-20);
   buyPrices.forEach((price) => {
     const line = candleSeries.createPriceLine({
       price,
@@ -346,10 +346,12 @@ function drawBuyLimitLines() {
       lineStyle: LightweightCharts.LineStyle.Solid,
       axisLabelVisible: true,
       title: `BUY ${price.toFixed(0)}`,
+      autoScale: false,   // ✅ IMPORTANT: stops chart from shrinking
     });
     buyLineRefs.push(line);
   });
 }
+
 
 let marketLineRef = null;
 function drawMarketPriceLine(currentPrice) {
@@ -364,8 +366,10 @@ function drawMarketPriceLine(currentPrice) {
     lineStyle: LightweightCharts.LineStyle.Dashed,
     axisLabelVisible: true,
     title: `MKT ${parseFloat(currentPrice).toFixed(2)}`,
+    autoScale: false,   // ✅ IMPORTANT
   });
 }
+
 
 
 /* ===================== COUNTDOWN UI VARS (MUST BE FIRST) ===================== */

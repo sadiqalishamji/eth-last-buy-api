@@ -361,7 +361,7 @@
 
     async function loadChartOnce() {
       if (!chart) initChart();
-      const candles = await fetchCandles("15m", 250);
+      const candles = await fetchCandles("15m", 120);
       candleSeries.setData(candles);
 
       _lastCandleTime = candles.length ? candles[candles.length - 1].time : 0;

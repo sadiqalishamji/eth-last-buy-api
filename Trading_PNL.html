@@ -128,6 +128,16 @@
       font-weight: 700;
     }
 
+#ethChartWrapper {
+  width: 100%;
+  max-width: 100%;
+}
+
+#ethChart {
+  width: 100%;
+  height: 500px;
+}
+
     /* Close Button */
     .btn-close {
       padding: 6px 10px;
@@ -164,8 +174,9 @@
   
 <!-- TradingView Widget BEGIN -->
 
+<div id="ethChartWrapper">
 <div id="ethChart" style="height:500px; width:100%;"></div>
-
+</div>
 <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
 <!-- TradingView Widget END -->
@@ -575,21 +586,36 @@ ring.setAttribute('stroke-dasharray', circumference.toFixed(2));
 
 <script>
 /* ================== CHART SETUP ================== */
-const chart = LightweightCharts.createChart(
-  document.getElementById('ethChart'),
-  {
-    layout: {
-      background: { color: '#ffffff' },
-      textColor: '#111827'
-    },
-    grid: {
-      vertLines: { color: '#e5e7eb' },
-      horzLines: { color: '#e5e7eb' }
-    },
-    timeScale: { timeVisible: true },
-    rightPriceScale: { borderColor: '#d1d5db' }
-  }
-);
+const chartContainer = document.getElementById('ethChart');
+
+const chart = LightweightCharts.createChart(chartContainer, {
+  width: chartContainer.clientWidth,
+  height: 500,
+
+  layout: {
+    background: { color: '#ffffff' },
+    textColor: '#111827'
+  },
+  grid: {
+    vertLines: { color: '#e5e7eb' },
+    horzLines: { color: '#e5e7eb' }
+  },
+  rightPriceScale: { borderColor: '#d1d5db' },
+  timeScale: { timeVisible: true }
+});
+
+function resizeChart() {
+  chart.applyOptions({
+    width: chartContainer.clientWidth,
+    height: 500
+  });
+}
+
+window.addEventListener('resize', resizeChart);
+
+// initial fix for delayed layout
+setTimeout(resizeChart, 100);
+
 
 const candleSeries = chart.addSeries(
   LightweightCharts.CandlestickSeries,

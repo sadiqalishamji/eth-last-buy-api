@@ -373,6 +373,7 @@
     to: candles.length - 1,
   });
 
+
     }
 
     function clearBuyLines() {
@@ -683,6 +684,9 @@
 
         await fetchBalance();
         buildTable(currentPrice);
+
+	const candles = await fetchCandles("15m", 120);
+	candleSeries.setData(candles);
 
         // update chart overlays
         drawBuyLimitLines();

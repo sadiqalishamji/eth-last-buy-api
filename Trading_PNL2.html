@@ -141,13 +141,6 @@
 <body>
 <div class="container">
 
-  <div id="ethChartWrapper">
-    <div id="ethChart" style="height:500px; width:100%;"></div>
-  </div>
-
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-
-  <div style="text-align:center; margin-bottom:18px;">
     <h1>ETH Buy Tables</h1>
     <svg width="60" height="60" viewBox="0 0 60 60">
       <circle id="refreshRingBg" cx="30" cy="30" r="26" fill="none" stroke-width="5" stroke="#d6dce3" />
@@ -509,110 +502,6 @@ setInterval(async () => {
     refreshRemaining = refreshIntervalSec;
   }
 }, 100);
-
-/* ===================== CHART SETUP ===================== */
-const chartContainer = document.getElementById('ethChart');
-
-const chart = LightweightCharts.createChart(chartContainer, {
-  width: chartContainer.clientWidth,
-  height: 500,
-  layout: { background: { color: '#ffffff' }, textColor: '#111827' },
-  grid: {
-    vertLines: { color: '#e5e7eb' },
-    horzLines: { color: '#e5e7eb' }
-  },
-  rightPriceScale: {
-    autoScale: true,
-    scaleMargins: { top: 0.15, bottom: 0.15 },
-    borderColor: '#d1d5db'
-  },
-  timeScale: { timeVisible: true, secondsVisible: false }
-});
-
-// IMPORTANT: candleSeries was missing in your code (this was a fatal bug)
-const candleSeries = chart.addCandlestickSeries();
-
-function resizeChart() {
-  chart.applyOptions({ width: chartContainer.clientWidth, height: 500 });
-}
-window.addEventListener('resize', resizeChart);
-setTimeout(resizeChart, 100);
-
-let buyLines = [];
-
-async function loadCandles() {
-  try {
-    const res = await fetch(
-      'https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=15m&limit=200',
-      { cache: 'no-store' }
-    );
-    const data = await res.json();
-
-    const candles = data.map(c => ({
-      time: c[0] / 1000,
-      open: +c[1],
-      high: +c[2],
-      low: +c[3],
-      close: +c[4]
-    }));
-
-    candleSeries.setData(candles);
-    chart.timeScale().fitContent();
-
-    chart.timeScale().setVisibleLogicalRange({
-      from: Math.max(0, candles.length - 80),
-      to: candles.length
-    });
-  } catch (e) {
-    console.error("loadCandles error:", e);
-  }
-}
-
-function drawBuyLimitLines() {
-  buyLines.forEach(l => candleSeries.removePriceLine(l));
-  buyLines = [];
-
-  const start = +document.getElementById('startPrice').value || defaultValues.startPrice;
-  const end   = +document.getElementById('endPrice').value   || defaultValues.endPrice;
-  const step  = Math.abs(+document.getElementById('step').value || defaultValues.step);
-  const lastBuy = +document.getElementById('lastBuy').value || defaultValues.lastBuy;
-
-  for (let price = end; price <= start; price += step) {
-    // show only already-placed/filled area (<= lastBuy)
-    if (price > lastBuy) continue;
-
-    const line = candleSeries.createPriceLine({
-      price,
-      color: '#22c55e',
-      lineWidth: 2,
-      lineStyle: LightweightCharts.LineStyle.Solid,
-      axisLabelVisible: true,
-      title: 'Buy Limit'
-    });
-
-    buyLines.push(line);
-  }
-}
-
-function drawMarketPriceLine(price) {
-  if (window.marketLine) {
-    candleSeries.removePriceLine(window.marketLine);
-  }
-  window.marketLine = candleSeries.createPriceLine({
-    price,
-    color: '#2563eb',
-    lineWidth: 2,
-    lineStyle: LightweightCharts.LineStyle.Dotted,
-    axisLabelVisible: true,
-    title: 'Market'
-  });
-}
-
-/* ===================== INIT ===================== */
-loadInputs();
-loadCandles();
-safeRefresh();
-</script>
 
 </body>
 </html>

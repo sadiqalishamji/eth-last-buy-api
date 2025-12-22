@@ -380,11 +380,11 @@
       const lastBuy = parseFloat(document.getElementById("lastBuy").value) || defaultValues.lastBuy;
 
       const buys = [];
-      for (let p = start; p >= end; p -= step) buys.push(p);
+      for (let p = end; p <= start; p += step) buys.push(p);
       buys.reverse();
 
-      // same rule as your table: only show rows where buyPrice > lastBuy
-      return buys.filter((p) => p > lastBuy);
+      // same rule as your table: only show rows where buyPrice < lastBuy
+      return buys.filter((p) => p < lastBuy);
     }
 
     function drawBuyLimitLines() {

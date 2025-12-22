@@ -601,7 +601,13 @@ const chart = LightweightCharts.createChart(chartContainer, {
     horzLines: { color: '#e5e7eb' }
   },
   rightPriceScale: { borderColor: '#d1d5db' },
-  timeScale: { timeVisible: true }
+  timeScale: {
+  timeVisible: true,
+  secondsVisible: false,
+  rightBarStaysOnScroll: true,
+  borderColor: '#d1d5db'
+}
+
 });
 
 function resizeChart() {
@@ -637,6 +643,7 @@ async function loadCandles() {
     'https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=15m&limit=200',
     { cache: 'no-store' }
   );
+
   const data = await res.json();
 
   const candles = data.map(c => ({
@@ -648,9 +655,17 @@ async function loadCandles() {
   }));
 
   candleSeries.setData(candles);
-// 🔧 CRITICAL FIX — FIT CHART TO DATA
-chart.timeScale().fitContent();
+
+  // 🔧 FIX VISIBILITY
+  chart.timeScale().fitContent();
+
+  // optional: Binance-like zoom
+  chart.timeScale().setVisibleLogicalRange({
+    from: candles.length - 80,
+    to: candles.length
+  });
 }
+
 
 /* ================== DRAW BUY LIMIT LINES ================== */
 function drawBuyLimitLines() {

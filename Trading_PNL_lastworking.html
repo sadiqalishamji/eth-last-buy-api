@@ -521,9 +521,9 @@
         const resp = await fetch("getBalance.php", { cache: "no-store" });
         const data = await resp.json();
         const isolatedUSDT = parseFloat(data.isolatedUSDT ?? 0) || 0;
-	const spotEstimatedUSDT = parseFloat(data.spotEstimatedUSDT ?? 0) || 0;
+	const spotUSDT = parseFloat(data.spotUSDT ?? 0) || 0;
         document.getElementById("isoBalance").textContent = isolatedUSDT.toFixed(2) + " USDT";
-	document.getElementById("spotBalance").textContent = spotEstimatedUSDT.toFixed(2) + " USDT";
+	document.getElementById("spotBalance").textContent = spotUSDT.toFixed(2) + " USDT";
         return isolatedUSDT;
 	return spotUSDT;
       } catch (e) {

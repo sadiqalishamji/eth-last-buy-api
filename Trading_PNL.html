@@ -239,7 +239,8 @@
     <div id="fetchedInfo">
       ETH Price: <span id="currentPriceDisplay">-</span> &nbsp; | &nbsp;
       Nearest Buy order: <span id="lastBuyDisplay">-</span> &nbsp; | &nbsp;
-      Available : <span id="usdtBalance">-</span> &nbsp; | &nbsp;
+      Isolated: <span id="isoBalance">-</span> &nbsp; | &nbsp;
+      Spot: <span id="spotBalance">-</span> &nbsp; | &nbsp;
       Error: <span id="jasonerror">-</span>
     </div>
 
@@ -519,12 +520,15 @@
       try {
         const resp = await fetch("getBalance.php", { cache: "no-store" });
         const data = await resp.json();
-        const bal = parseFloat(data.freeUSDT ?? 0) || 0;
-        document.getElementById("usdtBalance").textContent = bal.toFixed(2) + " USDT";
+        const isolatedUSDT = parseFloat(data.isolatedUSDT ?? 0) || 0;
+	const spotUSDT = parseFloat(data.spotUSDT ?? 0) || 0;
+        document.getElementById("isoBalance").textContent = isolatedUSDT.toFixed(2) + " USDT";
+	document.getElementById("spotBalance").textContent = spotUSDT.toFixed(2) + " USDT";
         return bal;
       } catch (e) {
         console.error("Balance fetch error", e);
-        document.getElementById("usdtBalance").textContent = "-";
+        document.getElementById("isoBalance").textContent = "-";
+	document.getElementById("spotBalance").textContent = "-";
         return 0;
       }
     }

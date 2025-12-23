@@ -407,8 +407,8 @@
           color: "rgba(0,123,255,0.55)",
           lineWidth: 1,
           lineStyle: LightweightCharts.LineStyle.Solid,
-          axisLabelVisible: false,
-          title: '',
+          axisLabelVisible: true,
+          title: `BUY ${price.toFixed(0)}`,
         });
         buyLineRefs.push(line);
       });
@@ -425,7 +425,7 @@
         color: "rgba(0,0,0,0.45)",
         lineWidth: 1,
         lineStyle: LightweightCharts.LineStyle.Dashed,
-        axisLabelVisible: false
+        axisLabelVisible: false,
         title: '',
       });
     }

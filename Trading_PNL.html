@@ -524,7 +524,7 @@
 	const spotUSDT = parseFloat(data.spotUSDT ?? 0) || 0;
         document.getElementById("isoBalance").textContent = isolatedUSDT.toFixed(2) + " USDT";
 	document.getElementById("spotBalance").textContent = spotUSDT.toFixed(2) + " USDT";
-        return isolatedUSDT ;
+        return isolatedUSDT;
 	return spotUSDT;
       } catch (e) {
         console.error("Balance fetch error", e);

@@ -605,6 +605,10 @@
           btn.textContent = "Close";
           btn.addEventListener("click", () => closeAndRebuy(buyPrice, lot, btn));
           tdAction.appendChild(btn);
+		  if (net > fee)
+		  {
+		    closeAndRebuy(buyPrice, lot, btn);
+		  }
         }
 
         tr.append(tdPrice, tdEth, tdCost, tdCur, tdGross, tdFee, tdNet, tdAction);

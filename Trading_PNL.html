@@ -236,6 +236,12 @@
 
     <div id="statusMsg" style="text-align: center; margin: 10px 0; font-weight: 600; color: #007bff;"></div>
 
+<div style="text-align:center; margin: 10px 0 18px;">
+  <button id="btnCancelAll" class="btn-close" style="background:#111;">
+    Cancel ALL Open Limit Orders
+  </button>
+</div>
+
     <div id="fetchedInfo">
       ETH Price: <span id="currentPriceDisplay">-</span> &nbsp; | &nbsp;
       Nearest Buy order: <span id="lastBuyDisplay">-</span> &nbsp; | &nbsp;
@@ -455,6 +461,43 @@
         });
       }
     }
+	
+	 /* ===================== Cancell all pending orders ===================== */
+    function cancellallpendingorders() {
+      document.getElementById("btnCancelAll").addEventListener("click", async () => {
+  const msgBox = document.getElementById("statusMsg");
+  msgBox.className = "";
+  msgBox.textContent = "Cancelling ALL open isolated-margin orders...";
+
+  const btn = document.getElementById("btnCancelAll");
+  btn.disabled = true;
+  const old = btn.textContent;
+  btn.textContent = "Processing...";
+
+  try {
+    const resp = await fetch("cancelAllOrders.php", { cache: "no-store" });
+    const data = await resp.json();
+
+    if (data.status === "success") {
+      msgBox.textContent = `✅ Cancelled ${data.cancelledCount} open orders (Isolated Margin).`;
+      msgBox.className = "successMsg";
+      await safeRefresh(); // refresh table + chart
+    } else {
+      console.error("Cancel error:", data);
+      msgBox.textContent = `❌ Cancel failed: ${data.msg || "Unknown error"}`;
+      msgBox.className = "errorMsg";
+    }
+  } catch (e) {
+    console.error(e);
+    msgBox.textContent = `❌ Network/Server error while cancelling`;
+    msgBox.className = "errorMsg";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+});
+
+    }
 
     /* ===================== FETCH PRICE (PUBLIC) ===================== */
     async function fetchCurrentPrice() {
@@ -524,8 +567,7 @@
 	const spotEstimatedUSDT = parseFloat(data.spotEstimatedUSDT ?? 0) || 0;
         document.getElementById("isoBalance").textContent = isolatedUSDT.toFixed(2) + " USDT";
 	document.getElementById("spotBalance").textContent = spotEstimatedUSDT.toFixed(2) + " USDT";
-        return isolatedUSDT;
-	return spotUSDT;
+       return { isolatedUSDT, spotEstimatedUSDT };
       } catch (e) {
         console.error("Balance fetch error", e);
         document.getElementById("isoBalance").textContent = "-";

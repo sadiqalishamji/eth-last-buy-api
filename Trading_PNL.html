@@ -236,6 +236,29 @@
 
     <div id="statusMsg" style="text-align: center; margin: 10px 0; font-weight: 600; color: #007bff;"></div>
 
+<div class="inputs">
+  <div>
+    <label>Price Range (Start - End)</label>
+    <input id="priceRangeStart" type="number" placeholder="1500" />
+    <input id="priceRangeEnd" type="number" placeholder="1600" />
+  </div>
+  <div>
+    <label>Price Step (USD)</label>
+    <input id="priceStep" type="number" placeholder="5" />
+  </div>
+  <div>
+    <label>Lot Size (ETH)</label>
+    <input id="limitLotSize" type="number" step="1" placeholder="0.03" />
+  </div>
+</div>
+
+<div style="text-align:center; margin: 10px 0;">
+  <button id="btnOpenLimitOrders" class="btn-close">
+    Open Limit Orders
+  </button>
+</div>
+
+
 <div style="text-align:center; margin: 10px 0 18px;">
   <button id="btnCancelAll" class="btn-close" style="background:#111;">
     Cancel ALL Open Limit Orders
@@ -461,6 +484,81 @@
         });
       }
     }
+
+	 /* ===================== open limit orders ===================== */
+function placelimitorders() {
+document.getElementById("btnOpenLimitOrders").addEventListener("click", async () => {
+  const msgBox = document.getElementById("statusMsg");
+  msgBox.className = "";
+  msgBox.textContent = "Placing Limit Orders...";
+
+  const btn = document.getElementById("btnOpenLimitOrders");
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = "Processing...";
+
+  // Collect input values
+  const priceRangeStart = parseFloat(document.getElementById("priceRangeStart").value);
+  const priceRangeEnd = parseFloat(document.getElementById("priceRangeEnd").value);
+  const priceStep = parseFloat(document.getElementById("priceStep").value);
+  const lotSize = parseFloat(document.getElementById("limitLotSize").value);
+
+  if (isNaN(priceRangeStart) || isNaN(priceRangeEnd) || isNaN(priceStep) || isNaN(lotSize)) {
+    msgBox.textContent = "❌ Invalid input values.";
+    msgBox.className = "errorMsg";
+    btn.disabled = false;
+    btn.textContent = oldText;
+    return;
+  }
+
+  // Validate price range
+  if (priceRangeEnd <= priceRangeStart) {
+    msgBox.textContent = "❌ Price range end must be greater than start.";
+    msgBox.className = "errorMsg";
+    btn.disabled = false;
+    btn.textContent = oldText;
+    return;
+  }
+
+  // Prepare data to send to PHP
+  const orders = [];
+  for (let price = priceRangeStart; price <= priceRangeEnd; price += priceStep) {
+    orders.push({
+      price: price.toFixed(2),
+      lotSize: lotSize.toFixed(4),
+    });
+  }
+
+  try {
+    const resp = await fetch("placeLimitOrders.php", {
+      method: "POST",
+      body: JSON.stringify(orders),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await resp.json();
+    if (data.status === "success") {
+      msgBox.textContent = `✅ Successfully placed ${data.orderCount} limit orders.`;
+      msgBox.className = "successMsg";
+      await safeRefresh();
+    } else {
+      console.error("Place order error:", data);
+      msgBox.textContent = `❌ Failed to place orders: ${data.msg || "Unknown error"}`;
+      msgBox.className = "errorMsg";
+    }
+  } catch (err) {
+    console.error("Fetch exception:", err);
+    msgBox.textContent = `❌ Network/Server error while placing orders`;
+    msgBox.className = "errorMsg";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+});
+
+	}
 	
 	 /* ===================== Cancell all pending orders ===================== */
     function cancellallpendingorders() {
@@ -769,6 +867,7 @@
     /* ===================== INIT ===================== */
     loadInputs();
     cancellallpendingorders();
+	placelimitorders();
     loadChartOnce()
       .then(() => safeRefresh())
       .catch((err) => {

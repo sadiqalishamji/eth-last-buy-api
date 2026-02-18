@@ -768,7 +768,7 @@
 
     /* ===================== INIT ===================== */
     loadInputs();
-
+    cancellallpendingorders();
     loadChartOnce()
       .then(() => safeRefresh())
       .catch((err) => {

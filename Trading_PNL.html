@@ -196,7 +196,11 @@
 
 <body>
   <div class="container">
-    <h1>ETH Buy Tables</h1>
+    <h1>ETH Buy Tables</h1><div style="text-align: center; margin: 10px 0;">
+  <label for="autoRebuySwitch" style="font-weight: 600;">Enable Auto close and Rebuy</label>
+  <input type="checkbox" id="autoRebuySwitch" />
+</div>
+
 
     <div id="chartWrap">
       <div id="ethChart"></div>
@@ -745,10 +749,10 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
           btn.textContent = "Close";
           btn.addEventListener("click", () => closeAndRebuy(buyPrice, lot, btn));
           tdAction.appendChild(btn);
-		  if (net > fee)
+		  if (document.getElementById("autoRebuySwitch").checked && net > fee) 
 		  {
-		    closeAndRebuy(buyPrice, lot, btn);
-		  }
+        closeAndRebuy(buyPrice, lot, btn);
+          }
         }
 
         tr.append(tdPrice, tdEth, tdCost, tdCur, tdGross, tdFee, tdNet, tdAction);
@@ -863,8 +867,31 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
         refreshRemaining = refreshIntervalSec;
       }
     }, 100);
+	
+	 /* ===================== autoRebuySwitch is enabled ===================== */
+	 
+function loadAutoRebuyStatus() {
+  const switchStatus = localStorage.getItem("autoRebuySwitch");
+  const switchElement = document.getElementById("autoRebuySwitch");
+
+  if (switchStatus !== null) {
+    switchElement.checked = switchStatus === "true";
+  } else {
+    switchElement.checked = false; // default to off
+  }
+}
+
+ /* ===================== Save the switch status in localStorage ===================== */
+ 
+function saveAutoRebuyStatus() {
+  const switchElement = document.getElementById("autoRebuySwitch");
+  localStorage.setItem("autoRebuySwitch", switchElement.checked);
+}
+
 
     /* ===================== INIT ===================== */
+	document.getElementById("autoRebuySwitch").addEventListener("change", saveAutoRebuyStatus);
+	loadAutoRebuyStatus();
     loadInputs();
     cancellallpendingorders();
 	placelimitorders();

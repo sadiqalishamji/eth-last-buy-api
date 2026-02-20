@@ -711,6 +711,7 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
         const gross = currentValue - cost;
         const fee = cost * feeRate;
         const net = gross - fee;
+		const takeprofit = fee * 4;
 
         if (net > 0) lastPositiveNet = net;
         if (net < 0) hasNegative = true;
@@ -749,9 +750,9 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
           btn.textContent = "Close";
           btn.addEventListener("click", () => closeAndRebuy(buyPrice, lot, btn));
           tdAction.appendChild(btn);
-		  if (document.getElementById("autoRebuySwitch").checked && net > fee) 
+		  if (document.getElementById("autoRebuySwitch").checked && net > takeprofit) 
 		  {
-        closeAndRebuy(buyPrice, lot, btn);
+				closeAndRebuy(buyPrice, lot, btn);
           }
         }
 

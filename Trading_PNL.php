@@ -650,7 +650,7 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
             currentPrice: data.currentPrice ? parseFloat(data.currentPrice) : null,
           };
         } else {
-          document.getElementById("temperrorshow").textContent = "-";
+          document.getElementById("temperrorshow").textContent = data.nearestBuyPrice;
         }
 
         if (data.nearestBuyPrice && parseFloat(data.nearestBuyPrice) > 0) {
@@ -667,7 +667,7 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
       } catch (err) {
         console.error("fetchNearestBuy error", err);
         document.getElementById("lastBuyDisplay").textContent = document.getElementById("lastBuy").value || "-";
-        document.getElementById("temperrorshow").textContent = String(err);
+        document.getElementById("temperrorshow").textContent = data.nearestBuyPrice;
         return {
           nearestBuy: parseFloat(document.getElementById("lastBuy").value || 0),
           currentPrice: null,

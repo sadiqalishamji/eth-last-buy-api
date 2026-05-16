@@ -667,7 +667,7 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
       } catch (err) {
         console.error("fetchNearestBuy error", err);
         document.getElementById("lastBuyDisplay").textContent = document.getElementById("lastBuy").value || "-";
-        document.getElementById("jasonerror").textContent = String(err);
+        document.getElementById("temperrorshow").textContent = String(err);
         return {
           nearestBuy: parseFloat(document.getElementById("lastBuy").value || 0),
           currentPrice: null,

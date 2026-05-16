@@ -251,6 +251,11 @@ echo "Public IP: $ip";
     <div id="statusMsg" style="text-align: center; margin: 10px 0; font-weight: 600; color: #007bff;"></div>
 
 <div class="inputs">
+ <div>
+    <label >Temp Error show </label>
+    <span id="temperrorshow" type="text"></span>
+  </div>
+  
   <div>
     <label>Price Range (Start - End)</label>
     <input id="priceRangeStart" type="number" placeholder="1500" />
@@ -637,7 +642,7 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
         const lastBuyInput = document.getElementById("lastBuy");
 
         if (data.status === "error") {
-          document.getElementById("jasonerror").textContent = data.msg || "Server error";
+          document.getElementById("temperrorshow").textContent = data.msg || "Server error";
           console.error("Binance detail:", data.binanceResponse || data);
           document.getElementById("lastBuyDisplay").textContent = lastBuyInput.value || "-";
           return {
@@ -645,7 +650,7 @@ document.getElementById("btnOpenLimitOrders").addEventListener("click", async ()
             currentPrice: data.currentPrice ? parseFloat(data.currentPrice) : null,
           };
         } else {
-          document.getElementById("jasonerror").textContent = "-";
+          document.getElementById("temperrorshow").textContent = "-";
         }
 
         if (data.nearestBuyPrice && parseFloat(data.nearestBuyPrice) > 0) {

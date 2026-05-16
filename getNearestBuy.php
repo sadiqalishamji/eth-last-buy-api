@@ -14,10 +14,10 @@ function sign($query, $secret) {
 $timestamp = round(microtime(true) * 1000);
 $recvWindow = 60000;
 
-// Build query for margin allOrders with isolated filter
+// Build query for margin openOrders with isolated filter
 $query = "symbol=$symbol&isIsolated=true&status=NEW&type=LIMIT&recvWindow=$recvWindow&timestamp=$timestamp";
 $signature = sign($query, $apiSecret);
-$url = "https://api.binance.com/sapi/v1/margin/allOrders?$query&signature=$signature";
+$url = "https://api.binance.com/sapi/v1/margin/openOrders?$query&signature=$signature";
 
 // CURL request
 $ch = curl_init($url);
